@@ -1,6 +1,6 @@
 # Vernam Share
 
-A small Go service for sharing a message through a one-time URL. The message is encrypted with a byte-wise XOR one-time pad (Vernam cipher). A cryptographically secure random key, exactly as long as the UTF-8 message, is generated per message.
+A small Go service for sharing a message through a URL with a configurable view limit. The message is encrypted with a byte-wise XOR one-time pad (Vernam cipher). A cryptographically secure random key, exactly as long as the UTF-8 message, is generated per message.
 
 The web UI is embedded into the Go executable at build time. **The resulting binary runs without a separate `web/` directory or Go installed on the target machine.**
 
@@ -112,18 +112,18 @@ Create:
 ```sh
 curl -s http://localhost:8080/api/messages \
   -H 'Content-Type: application/json' \
-  -d '{"message":"secret text"}'
+  -d '{"message":"secret text","maxViews":3}'
 ```
 
-Returns `{ "id": "...", "key": "...", "expiresIn": "24h0m0s" }`. The `key` is secret; never log or send it to the server again.
+`maxViews` is optional, defaults to `1`, and accepts values from `1` to `1000`. The response includes the ID, secret key, expiry, and view counters. The `key` is secret; never log or send it to the server again.
 
-Consume once:
+Retrieve a view:
 
 ```sh
 curl -s http://localhost:8080/api/messages/MESSAGE_ID
 ```
 
-Returns ciphertext only. The server atomically deletes the message before responding, so concurrent reads can only have one winner.
+Each successful retrieval atomically increments `viewsUsed`. The message is deleted once `viewsUsed` reaches `maxViews`. The response includes `maxViews`, `viewsUsed`, and `viewsRemaining`.
 
 Health check: `GET /healthz`.
 

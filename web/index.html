@@ -16,13 +16,30 @@ main{width:min(760px,100%)}
 .brand-mark svg{width:52px;height:52px;display:block;filter:drop-shadow(0 2px 4px #0008)}
 .brand-copy{position:relative;min-width:0;flex:1}.brand h1{font-size:clamp(21px,3.6vw,27px);line-height:1.08;margin:0;letter-spacing:-.045em;font-weight:850;background:linear-gradient(100deg,#fff8df 0%,#f1d58c 35%,#ffffff 68%,#a9f5dc 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 5px 20px #0002}.brand p{color:#a7b8cc;font-size:12px;letter-spacing:.09em;text-transform:uppercase;margin:7px 0 0}.brand-tag{position:relative;z-index:1;align-self:flex-start;white-space:nowrap;border:1px solid #52796f;background:#122c2a;color:#aaf5d7;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 @media(max-width:480px){.brand{gap:12px;padding:14px 13px}.brand-mark{flex-basis:52px;width:52px;height:52px;border-radius:16px}.brand-mark svg{width:44px;height:44px}.brand-tag{display:none}.brand p{font-size:10px;letter-spacing:.06em}}
-.card{background:#111827eF;border:1px solid var(--line);border-radius:22px;padding:clamp(20px,4vw,34px);box-shadow:0 22px 80px #0005}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--accent);font-weight:700}h2{font-size:clamp(25px,5vw,36px);line-height:1.12;margin:9px 0 12px}p{color:var(--muted)}label{display:block;font-weight:650;margin:22px 0 8px}textarea,input{font:inherit;color:var(--text);background:#0a101c;border:1px solid #33415a;border-radius:12px;width:100%;padding:14px;outline:none}textarea{min-height:160px;resize:vertical}textarea:focus,input:focus{border-color:var(--accent)}button{font:inherit;font-weight:750;border:0;border-radius:12px;padding:13px 18px;cursor:pointer;background:var(--accent);color:#07150f}button.secondary{background:#202b3e;color:var(--text);border:1px solid #39465d}button:disabled{opacity:.55;cursor:wait}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.notice{margin-top:16px;padding:13px 15px;border:1px solid var(--line);border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}.notice.error{color:var(--danger)}.notice.success{color:var(--accent)}.small{font-size:13px}.hidden{display:none}.link{display:flex;gap:8px;margin-top:8px}.link input{min-width:0}.pill{display:inline-block;border:1px solid #345b50;color:var(--accent);border-radius:999px;padding:4px 9px;font-size:12px}.foot{font-size:12px;text-align:center;color:#71809b;margin-top:18px}.mono{font-family:ui-monospace,SFMono-Regular,monospace}
+.card{background:#111827eF;border:1px solid var(--line);border-radius:22px;padding:clamp(20px,4vw,34px);box-shadow:0 22px 80px #0005}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--accent);font-weight:700}
+.intro-row{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.intro-row .intro-title{margin:0}
+.intro-delimiter{color:var(--accent);font-size:11px;font-weight:700;letter-spacing:0;white-space:pre}
+h2{font-size:clamp(25px,5vw,36px);line-height:1.12;margin:9px 0 12px}p{color:var(--muted)}label{display:block;font-weight:650;margin:22px 0 8px}textarea,input{font:inherit;color:var(--text);background:#0a101c;border:1px solid #33415a;border-radius:12px;width:100%;padding:14px;outline:none}textarea{min-height:160px;resize:vertical}textarea:focus,input:focus{border-color:var(--accent)}.password-tools{margin-top:14px}.views-tools{margin-top:14px}.views-tools>label{margin:0 0 8px;font-size:14px}.views-tools input{max-width:150px}.views-tools .small{display:block;margin-top:7px;min-height:18px;color:var(--muted)}.password-tools>label{margin:0 0 8px;font-size:14px}.password-controls{display:flex;align-items:stretch;gap:10px}.password-controls input{width:104px;flex:0 0 104px;padding:10px 12px}.password-controls button{flex:1}.password-tools .small{display:block;margin-top:7px;min-height:18px;color:var(--muted)}@media(max-width:420px){.password-controls{flex-wrap:wrap}.password-controls input{width:100%;flex:1 1 100%}.password-controls button{width:100%}}button{font:inherit;font-weight:750;border:0;border-radius:12px;padding:13px 18px;cursor:pointer;background:var(--accent);color:#07150f}button.secondary{background:#202b3e;color:var(--text);border:1px solid #39465d}button:disabled{opacity:.55;cursor:wait}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.create-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:12px;margin-top:18px}
+.create-actions .views-tools{min-width:0;margin-top:0;align-self:start}
+.views-control-row{display:flex;align-items:center;gap:12px;min-height:48px}
+.create-actions .views-tools label{flex:1;min-width:0;margin:0;font-size:14px;line-height:1.3;color:#dce6f6}
+.create-actions .views-tools input{flex:0 0 88px;width:88px;max-width:88px;height:48px;padding:10px 12px;text-align:center;font-variant-numeric:tabular-nums}
+.create-actions .views-tools .small{display:block;margin-top:7px;min-height:18px;color:var(--muted);font-size:12px;line-height:1.4}
+.create-link-btn{width:100%;min-width:0;height:48px;padding:0;display:grid;place-items:center;border:1px solid #3d9a7d;border-radius:14px;background:linear-gradient(180deg,#9cf5d0,#59caa3);color:#07150f;box-shadow:0 5px 14px #0003;transition:filter .18s ease,transform .18s ease,box-shadow .18s ease}
+.create-link-btn svg{width:24px;height:24px;display:block;pointer-events:none}
+.create-link-btn:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px);box-shadow:0 7px 18px #0004}
+.create-link-btn:active:not(:disabled){transform:translateY(0)}
+.create-link-btn:disabled{opacity:.7;cursor:wait;transform:none}
+.create-link-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:480px){.create-actions{gap:10px}.create-actions .views-tools label{font-size:13px}.create-actions .views-tools input{flex-basis:76px;width:76px;max-width:76px;padding:9px 8px}.create-link-btn{width:100%;height:46px;min-width:0}}
+.notice{margin-top:16px;padding:13px 15px;border:1px solid var(--line);border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}.notice.error{color:var(--danger)}.notice.success{color:var(--accent)}.small{font-size:13px}.hidden{display:none}.link{display:flex;gap:8px;margin-top:8px}.link input{min-width:0}.pill{display:inline-block;border:1px solid #345b50;color:var(--accent);border-radius:999px;padding:4px 9px;font-size:12px}.foot{font-size:12px;text-align:center;color:#71809b;margin-top:18px}.mono{font-family:ui-monospace,SFMono-Regular,monospace}
 
 .qr-panel{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:20px;padding:18px;background:#0a101c;border:1px solid #293348;border-radius:16px}
 .qr-wrap{position:relative;width:240px;height:240px;padding:8px;background:#fff;border-radius:10px;display:grid;place-items:center}
 #qrCode{width:224px;height:224px;display:grid;place-items:center}
 #qrCode canvas,#qrCode img{max-width:224px;max-height:224px;display:block}
-.qr-caption{font-size:13px;color:var(--muted);text-align:center;max-width:330px}
 .qr-download{margin-top:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 15px;border:1px solid #b98531;border-radius:10px;background:linear-gradient(180deg,#f8d77c,#c58b2d);color:#20180a;font-weight:800;cursor:pointer}.qr-download:hover:not(:disabled){filter:brightness(1.06)}.qr-download:disabled{opacity:.55;cursor:wait}.qr-download svg{width:17px;height:17px}
 
 
@@ -31,8 +48,6 @@ main{width:min(760px,100%)}
 .share-btn svg{width:21px;height:21px;display:block;flex:0 0 auto}
 .share-btn:hover{filter:brightness(1.15)}
 .share-btn.telegram{border-color:#267eaa}.share-btn.whatsapp{border-color:#25834c}.share-btn.facebook{border-color:#365fa6}.share-btn.slack{border-color:#6b4c7f}.share-btn.teams{border-color:#6264a7}.share-btn.viber{border-color:#7360f2}.share-btn.gmail{border-color:#c94b40}
-.share-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:16px}
-
 </style>
 </head>
 <body>
@@ -54,22 +69,44 @@ main{width:min(760px,100%)}
         <circle cx="49" cy="15" r="2" fill="#9CF5D0"/><circle cx="14" cy="42" r="1.5" fill="#E9BC5D"/>
       </svg>
     </div>
-    <div class="brand-copy"><h1>Vernam Share</h1><p>One-time messages · Private by design</p></div>
+    <div class="brand-copy"><h1>Vernam Share</h1><p>s · Private by design</p></div>
     <span class="brand-tag">Encrypted</span>
   </header>
   <section class="card" id="createView">
-    <div class="eyebrow">Private by design</div>
-    <h2>Send a message that disappears.</h2>
-    <p>The server stores only ciphertext. The decryption key is placed in the URL fragment, which browsers do not send to the server.</p>
+    <div class="intro-row">
+      <div class="eyebrow">Private by design</div>
+      <span class="intro-delimiter" aria-hidden="true"> · </span>
+      <h2 class="eyebrow intro-title">Send a message that disappears.</h2>
+    </div>
+    <p></p>
+    <div class="password-tools">
+      <label for="passwordLength">Password length</label>
+      <div class="password-controls">
+        <input id="passwordLength" type="number" min="4" max="256" value="24" inputmode="numeric" aria-label="Generated password length">
+        <button type="button" class="secondary" id="generatePasswordBtn">Generate password</button>
+      </div>
+      <div id="passwordStatus" class="small password-status" role="status" aria-live="polite">Generate a 24-character password and place it in the message field.</div>
+    </div>
     <label for="message">Your message</label>
     <textarea id="message" maxlength="1048576" placeholder="Write a message…"></textarea>
-    <div class="actions"><button id="createBtn">Create one-time link</button></div>
+    <div class="create-actions">
+      <div class="views-tools">
+        <div class="views-control-row">
+          <label for="maxViews">Views before deletion</label>
+          <input id="maxViews" type="number" min="1" max="1000" value="1" inputmode="numeric" aria-label="Number of allowed views">
+        </div>
+        <div id="viewsStatus" class="small" role="status" aria-live="polite">1 view allowed before deletion.</div>
+      </div>
+      <button id="createBtn" class="create-link-btn" type="button" aria-label="Create one-time link" title="Create one-time link">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a4.2 4.2 0 0 0 5.9 0l3-3a4.2 4.2 0 0 0-5.9-5.9l-1.7 1.7M13.4 10.6a4.2 4.2 0 0 0-5.9 0l-3 3a4.2 4.2 0 0 0 5.9 5.9l1.7-1.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
     <div id="createResult" class="hidden"></div>
   </section>
   <section class="card hidden" id="readView">
-    <div class="eyebrow">One-time message</div>
+    <div class="eyebrow"></div>
     <h2 id="readTitle">Retrieving message…</h2>
-    <p id="readDesc">This link can only be opened once. The message is removed from the server when retrieved.</p>
+    <p id="readDesc">This message is deleted after its allowed number of views.</p>
     <div id="readResult" class="notice">Loading…</div>
     <div class="actions"><button class="secondary" id="copyMessageBtn" disabled>Copy message</button><button class="secondary" id="backBtn">Create a new message</button></div>
     <div id="copyMessageStatus" class="small" role="status" aria-live="polite"></div>
@@ -93,20 +130,39 @@ function absoluteURL(id,key){ return location.origin + location.pathname + '#id=
 async function createMessage(){
   const message=$('message').value;
   if(!message.trim()){ $('message').focus(); return; }
-  const btn=$('createBtn'); btn.disabled=true; btn.textContent='Creating…';
+  const maxViews=Number($('maxViews').value);
+  if(!Number.isInteger(maxViews)||maxViews<1||maxViews>1000){
+    $('viewsStatus').textContent='Choose between 1 and 1000 views.';
+    $('maxViews').focus();
+    return;
+  }
+  const btn=$('createBtn'); btn.disabled=true; btn.setAttribute('aria-busy','true');
   try{
-    const res=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});
+    const res=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,maxViews})});
     const data=await res.json();
     if(!res.ok) throw Error(data.error||'Could not create message');
     const url=absoluteURL(data.id,data.key);
+    let copied=false;
+    try{
+      await navigator.clipboard.writeText(url);
+      copied=true;
+    }catch{
+      const field=document.createElement('textarea');
+      field.value=url;
+      field.style.position='fixed';
+      field.style.opacity='0';
+      document.body.appendChild(field);
+      field.select();
+      try{copied=document.execCommand('copy');}catch{}
+      field.remove();
+    }
     const result=$('createResult'); result.innerHTML='';
-    const notice=document.createElement('div'); notice.className='notice success'; notice.textContent='Link created. It expires in '+data.expiresIn+'. Save it now; the key will not be shown again.'; result.append(notice);
+    const notice=document.createElement('div'); notice.className='notice '+(copied?'success':''); notice.textContent='Link created. Views: '+data.viewsUsed+'/'+data.maxViews+' used; '+data.viewsRemaining+' remaining. Expires in '+data.expiresIn+'. Save it now; the key will not be shown again.'+(copied?' Link copied to clipboard.':' Automatic copying failed; use the Copy button below.'); result.append(notice);
     const label=document.createElement('label'); label.textContent='One-time link'; result.append(label);
     const wrap=document.createElement('div'); wrap.className='link';
     const input=document.createElement('input'); input.readOnly=true; input.value=url; input.className='mono'; input.setAttribute('aria-label','One-time link');
     const copy=document.createElement('button'); copy.textContent='Copy'; copy.onclick=async()=>{try{await navigator.clipboard.writeText(url);copy.textContent='Copied!';}catch{input.select();document.execCommand('copy');copy.textContent='Copied!';}};
     wrap.append(input,copy); result.append(wrap);
-    const shareLabel=document.createElement('div'); shareLabel.className='share-label'; shareLabel.textContent='Share this one-time link'; result.append(shareLabel);
     const shareActions=document.createElement('div'); shareActions.className='share-actions';
     const shareTargets=[
       {name:'Teams',cls:'teams',url:u=>'https://teams.microsoft.com/share?href='+encodeURIComponent(u),svg:'<path fill="currentColor" d="M17.5 7.2a3.1 3.1 0 1 0 0-6.2 3.1 3.1 0 0 0 0 6.2ZM20.6 8H14a3.8 3.8 0 0 1-3.2 1.7H9v8.1c0 .7.6 1.2 1.2 1.2h6.9c.7 0 1.2-.5 1.2-1.2v-6.4h2.3c.7 0 1.2-.5 1.2-1.2V9.2c0-.7-.5-1.2-1.2-1.2ZM8.8 6.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4ZM13 8.2H4.2C2.4 8.2 1 9.6 1 11.4v7.4c0 1 .8 1.8 1.8 1.8h9.4c1 0 1.8-.8 1.8-1.8v-7.4c0-1.8-1.4-3.2-3-3.2Z"/>'},
@@ -115,7 +171,7 @@ async function createMessage(){
       {name: 'Messenger',cls:'facebook',url:u=>'https://www.facebook.com/dialog/send?link='+encodeURIComponent(u),svg:'<path d="M13.5 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.4-.1-2.4 0-4.1 1.5-4.1 4.2v2.3H7.6v3.1h2.7v8h3.2Z" fill="currentColor"/>'},
       {name:'WhatsApp',cls:'whatsapp',url:u=>'https://wa.me/?text='+encodeURIComponent(u),svg:'<path d="M20.5 3.5A11.8 11.8 0 0 0 2 17.7L.5 23.5l6-1.6a11.8 11.8 0 0 0 14-18.4ZM12 21a9 9 0 0 1-4.6-1.3l-.3-.2-3.5.9.9-3.4-.2-.4A9 9 0 1 1 12 21Zm5-6.7c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2s-.8 1-1 1.1-.4.2-.7 0a8.4 8.4 0 0 1-2.5-1.5 9.3 9.3 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6s-.7-1.7-1-2.3c-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.7s1.2 3.1 1.4 3.3c.2.2 2.3 3.5 5.6 4.9.8.4 1.5.6 2 .7.8.3 1.6.2 2.2.1.7-.1 1.8-.7 2.1-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.3-.6-.5Z" fill="currentColor"/>'},
       {name:'Viber',cls:'viber',url:u=>'viber://forward?text='+encodeURIComponent(u),fallback:u=>'https://www.viber.com/',svg:'<path d="M19.4 4.6C17.8 3.1 15.2 2.5 12 2.5s-5.8.6-7.4 2.1C2.9 6.2 2.5 8.8 2.5 12s.4 5.8 2.1 7.4c.7.7 1.6 1.2 2.7 1.5l-.5 2.6 3.6-2.2h1.6c3.2 0 5.8-.6 7.4-2.1 1.7-1.6 2.1-4.2 2.1-7.4s-.4-5.8-2.1-7.2ZM8 7.1c.2-.2.4-.2.6-.1l1.4.7c.3.2.4.5.3.8l-.5 1c.5 1 1.3 1.8 2.3 2.3l1-.5c.3-.1.6 0 .8.3l.7 1.4c.1.2.1.5-.1.6-.5.5-1.2.8-1.9.7-2.8-.5-5.1-2.8-5.6-5.6-.1-.6.2-1.2 1-1.6Zm6.5 5.5a4.1 4.1 0 0 0-3.1-3.1V8a6.5 6.5 0 0 1 5 5h-1.9Zm0-4.5a8.4 8.4 0 0 1 4.5 4.5h-1.9a6.5 6.5 0 0 0-2.6-2.6V8.1Z" fill="currentColor"/>'},
-      {name:'Gmail',cls:'gmail',url:u=>'https://mail.google.com/mail/?view=cm&fs=1&su='+encodeURIComponent('One-time message')+'&body='+encodeURIComponent(u),svg:'<path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H7l5 3.8L17 4h1.5A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5H17V8.5l-5 3.8-5-3.8V20H5.5A2.5 2.5 0 0 1 3 17.5v-11Z" fill="currentColor"/><path d="m3.5 5.2 8.5 6.5 8.5-6.5" fill="none" stroke="#fff" stroke-width="1.5"/>'}
+      {name:'Gmail',cls:'gmail',url:u=>'https://mail.google.com/mail/?view=cm&fs=1&su='+encodeURIComponent('')+'&body='+encodeURIComponent(u),svg:'<path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H7l5 3.8L17 4h1.5A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5H17V8.5l-5 3.8-5-3.8V20H5.5A2.5 2.5 0 0 1 3 17.5v-11Z" fill="currentColor"/><path d="m3.5 5.2 8.5 6.5 8.5-6.5" fill="none" stroke="#fff" stroke-width="1.5"/>'}
     ];
     for(const target of shareTargets){
       const shareBtn=document.createElement('button'); shareBtn.type='button'; shareBtn.className='share-btn '+target.cls;
@@ -139,16 +195,13 @@ async function createMessage(){
       shareActions.append(shareBtn);
     }
     result.append(shareActions);
-    const hint=document.createElement('p'); hint.className='small'; hint.textContent='Send the entire link to the recipient over a trusted channel. The fragment contains the secret key.'; result.append(hint);
 
     const qrPanel=document.createElement('div'); qrPanel.className='qr-panel';
-    const qrTitle=document.createElement('strong'); qrTitle.textContent='Scan to open the one-time message'; qrPanel.append(qrTitle);
     const qrWrap=document.createElement('div'); qrWrap.className='qr-wrap';
     const qrHost=document.createElement('div'); qrHost.id='qrCode'; qrWrap.append(qrHost);
     const keyBadge=document.createElement('div'); keyBadge.className='qr-key'; keyBadge.setAttribute('aria-label','Key icon');
     keyBadge.innerHTML='<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="keyMetal" x1="8" y1="6" x2="38" y2="42" gradientUnits="userSpaceOnUse"><stop stop-color="#fff1a6"/><stop offset=".28" stop-color="#e8b94e"/><stop offset=".62" stop-color="#b87519"/><stop offset="1" stop-color="#ffe69a"/></linearGradient><linearGradient id="keyShade" x1="12" y1="10" x2="36" y2="38" gradientUnits="userSpaceOnUse"><stop stop-color="#fff8d8"/><stop offset="1" stop-color="#d7962a"/></linearGradient></defs><path d="M29.5 7.5a12 12 0 0 0-11.3 16.1L5.8 36a3.2 3.2 0 0 0 0 4.5l1.7 1.7a3.2 3.2 0 0 0 4.5 0l3.2-3.2 3.5 1 1-3.5 3.4-1 1-3.5 2.8-2.8A12 12 0 1 0 29.5 7.5Z" fill="#111827" opacity=".18" transform="translate(1 1.5)"/><path d="M29 5.5a12 12 0 0 0-11.3 16.1L5.3 34a3.2 3.2 0 0 0 0 4.5l1.7 1.7a3.2 3.2 0 0 0 4.5 0l3.2-3.2 3.5 1 1-3.5 3.4-1 1-3.5 2.8-2.8A12 12 0 1 0 29 5.5Z" fill="url(#keyMetal)" stroke="#8c5816" stroke-width="1.6" stroke-linejoin="round"/><path d="M29 10a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Z" fill="#fff0b1" opacity=".95"/><path d="M29 13.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" fill="#172033"/><path d="m8.7 35.1 4.2 4.2M14.2 29.7l4.2 4.2" stroke="#fff0b1" stroke-width="1.6" stroke-linecap="round" opacity=".9"/></svg>';
     qrPanel.append(qrWrap);
-    const qrCaption=document.createElement('div'); qrCaption.className='qr-caption'; qrCaption.textContent='The QR code contains the complete URL, including the secret key. Keep it private.'; qrPanel.append(qrCaption);
     if(window.QRCode){
       new QRCode(qrHost,{text:url,width:224,height:224,colorDark:'#101827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
     }else{
@@ -230,7 +283,7 @@ async function createMessage(){
     show(result);
     $('message').value='';
   }catch(e){show($('createResult'));setNotice($('createResult'),e.message,'error');}
-  finally{btn.disabled=false;btn.textContent='Create one-time link';}
+  finally{btn.disabled=false;btn.removeAttribute('aria-busy');}
 }
 async function readMessage(id,key){
   show($('createView'),false); show($('readView'));
@@ -241,7 +294,7 @@ async function readMessage(id,key){
     const plain=xor(dec(data.ciphertext),dec(key));
     const text=new TextDecoder('utf-8',{fatal:true}).decode(plain);
     $('readTitle').textContent='Message retrieved';
-    $('readDesc').textContent='This message has been consumed and cannot be retrieved again.';
+    $('readDesc').textContent='Views: '+data.viewsUsed+'/'+data.maxViews+' used; '+data.viewsRemaining+' remaining.'+(data.viewsRemaining===0?' This was the final allowed view.':'');
     setNotice($('readResult'),text,'success');
     $('copyMessageBtn').disabled=false;
     $('copyMessageBtn').dataset.message=text;
@@ -252,6 +305,51 @@ async function readMessage(id,key){
     setNotice($('readResult'),e.message,'error');
   }
 }
+function generatePassword(length){
+  const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()-_=+[]{};:,.?';
+  const limit=256-(256%alphabet.length);
+  let result='';
+  while(result.length<length){
+    const bytes=new Uint8Array(Math.max(32,(length-result.length)*2));
+    crypto.getRandomValues(bytes);
+    for(const byte of bytes){
+      if(byte<limit){
+        result+=alphabet[byte%alphabet.length];
+        if(result.length===length) break;
+      }
+    }
+  }
+  return result;
+}
+function updatePasswordStatus(){
+  const input=$('passwordLength');
+  const length=Number(input.value);
+  $('passwordStatus').textContent=Number.isInteger(length)&&length>=4&&length<=256
+    ? 'Generate a '+length+'-character password and place it in the message field.'
+    : 'Choose a length between 4 and 256.';
+}
+$('passwordLength').addEventListener('input',updatePasswordStatus);
+$('passwordLength').addEventListener('change',updatePasswordStatus);
+function updateViewsStatus(){
+  const count=Number($('maxViews').value);
+  $('viewsStatus').textContent=Number.isInteger(count)&&count>=1&&count<=1000
+    ? count+' view'+(count===1?'':'s')+' allowed before deletion.'
+    : 'Choose between 1 and 1000 views.';
+}
+$('maxViews').addEventListener('input',updateViewsStatus);
+$('maxViews').addEventListener('change',updateViewsStatus);
+$('generatePasswordBtn').addEventListener('click',()=>{
+  const input=$('passwordLength');
+  const length=Number(input.value);
+  if(!Number.isInteger(length)||length<4||length>256){
+    $('passwordStatus').textContent='Choose a length between 4 and 256.';
+    input.focus();
+    return;
+  }
+  $('message').value=generatePassword(length);
+  $('passwordStatus').textContent='Generated a '+length+'-character password and placed it in the message field.';
+  $('message').focus();
+});
 $('createBtn').addEventListener('click',createMessage);
 $('copyMessageBtn').addEventListener('click',async()=>{
   const btn=$('copyMessageBtn');
@@ -270,6 +368,9 @@ $('copyMessageBtn').addEventListener('click',async()=>{
   }
 });
 $('backBtn').addEventListener('click',()=>{history.replaceState(null,'',location.pathname);show($('readView'),false);show($('createView'));$('copyMessageBtn').disabled=true;delete $('copyMessageBtn').dataset.message;$('copyMessageStatus').textContent='';});
+// Reload the app whenever the URL fragment changes, so new one-time links are re-evaluated.
+window.addEventListener('hashchange',()=>window.location.reload());
+
 const params=new URLSearchParams(location.hash.slice(1));
 const id=params.get('id'), key=params.get('key');
 if(id && key){ readMessage(id,key); }
