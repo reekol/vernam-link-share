@@ -255,6 +255,8 @@ async function readMessage(id,key){
     if(!res.ok) throw Error(data.error||'Message unavailable');
     const plain=xor(dec(data.cipherx),dec(key));
     const text=new TextDecoder('utf-8',{fatal:true}).decode(plain);
+    // Remove the secret link fragment from the current browser-history entry after successful decryption.
+    history.replaceState(null, '', location.pathname + location.search);
     $('readTitle').textContent='Message retrieved';
     $('readDesc').textContent='Views: '+data.viewsUsed+'/'+data.maxViews+' used; '+data.viewsRemaining+' remaining.'+(data.viewsRemaining===0?' This was the final allowed view.':'');
     setNotice($('readResult'),text,'success');
@@ -262,6 +264,7 @@ async function readMessage(id,key){
     $('copyMessageBtn').dataset.message=text;
     $('copyMessageStatus').textContent='';
   }catch(e){
+    history.replaceState(null, '', location.pathname + location.search);
     $('readTitle').textContent='Message unavailable';
     $('readDesc').textContent='The link may have expired, already been opened, or be invalid.';
     setNotice($('readResult'),e.message,'error');
@@ -331,7 +334,8 @@ $('copyMessageBtn').addEventListener('click',async()=>{
 });
 $('backBtn').addEventListener('click',()=>{history.replaceState(null,'',location.pathname);show($('readView'),false);show($('createView'));$('copyMessageBtn').disabled=true;delete $('copyMessageBtn').dataset.message;$('copyMessageStatus').textContent='';});
 // Reload the app whenever the URL fragment changes, so new one-time links are re-evaluated.
-window.addEventListener('hashchange',()=>window.location.reload());
+// Disabled: do not reload the app when the URL hash changes.
+// window.addEventListener('hashchange',()=>window.location.reload());
 
 const params=new URLSearchParams(location.hash.slice(1));
 const id=params.get('id'), key=params.get('key');
