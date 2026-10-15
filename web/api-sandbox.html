@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Vernam Share — API Sandbox</title>
+<style>
+:root{color-scheme:dark;--bg:#0a0d14;--panel:#111827;--panel2:#0a101c;--line:#293348;--text:#edf2ff;--muted:#98a6c3;--accent:#9cf5d0;--gold:#e8b94e;--danger:#ff9a9a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#1a2840 0,#0a0d14 58%);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif;padding:24px}
+main{width:min(1200px,100%);margin:0 auto}.top{display:flex;align-items:center;gap:15px;padding:18px 20px;border:1px solid #35465b;border-radius:18px;background:linear-gradient(120deg,#172438ed,#101827e8 60%,#172b31e8);margin-bottom:18px}
+.mark{width:48px;height:48px;flex:0 0 48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#263d50,#111c2b 65%,#203c3b);border:1px solid #69858a;color:var(--accent)}
+h1{font-size:clamp(22px,3vw,30px);line-height:1.1;margin:0;letter-spacing:-.04em;background:linear-gradient(100deg,#fff8df,#f1d58c 40%,#a9f5dc 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:var(--muted);font-size:13px;margin:5px 0 0}.toplinks{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+a{color:var(--accent)}.nav{display:inline-flex;align-items:center;padding:8px 11px;border:1px solid #39465d;border-radius:10px;color:var(--text);text-decoration:none;background:#202b3e;font-size:12px;font-weight:750}
+.layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(320px,.88fr);gap:18px;align-items:start}
+.card{background:#111827ef;border:1px solid var(--line);border-radius:18px;padding:clamp(16px,2.4vw,24px);box-shadow:0 20px 65px #0004;min-width:0}
+.card+.card{margin-top:18px}.section-title{font-size:17px;margin:0 0 5px}.muted{color:var(--muted)}.intro{margin:0 0 18px;color:var(--muted);font-size:13px}
+label{display:block;font-weight:700;font-size:12px;color:#cdd8ed;margin:15px 0 7px}
+input,select,textarea{font:inherit;color:var(--text);background:#0a101c;border:1px solid #33415a;border-radius:10px;width:100%;padding:11px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}textarea{min-height:160px;resize:vertical;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}
+input,select{min-height:42px}.row{display:flex;gap:9px;align-items:center}.row>*{min-width:0}.method{flex:0 0 112px}.path{flex:1}.path input{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.btn{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:800;cursor:pointer;background:linear-gradient(180deg,#9cf5d0,#59caa3);color:#07150f;white-space:nowrap}.btn.secondary{background:#202b3e;color:var(--text);border:1px solid #39465d}.btn:disabled{opacity:.55;cursor:wait}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}.preset{background:#172236;border:1px solid #39465d;color:#dce6f6;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:750;cursor:pointer}.preset:hover,.nav:hover{border-color:var(--accent)}
+.generator{margin-top:16px;padding:15px;border:1px solid #3b665d;background:linear-gradient(145deg,#10221f,#0d1522 72%);border-radius:13px}
+.generator h3{margin:0 0 4px;font-size:14px;color:var(--accent)}.generator .help{margin:0;color:var(--muted);font-size:12px}
+.generator textarea{min-height:86px}.generator .generated{min-height:82px}.generator .toolbar{margin-top:10px}
+.note{padding:11px 13px;border:1px solid #33415a;background:#0d1522;border-radius:10px;color:var(--muted);font-size:12px;margin-top:13px}.note strong{color:var(--text)}
+.code{background:#080d16;border:1px solid #253147;border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#d7e3f5;margin:10px 0 0}
+.response-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.status{font:800 12px ui-monospace,monospace;padding:5px 9px;border-radius:999px;background:#202b3e;color:var(--muted)}.status.ok{color:var(--accent);border:1px solid #285a4b}.status.bad{color:var(--danger);border:1px solid #74404b}
+.tabs{display:flex;gap:6px;margin-top:14px}.tab{background:#202b3e;color:var(--muted);border:1px solid #39465d;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:750;cursor:pointer}.tab.active{color:var(--accent);border-color:#4d9079}
+.doc-endpoint{border-top:1px solid var(--line);padding:13px 0}.doc-endpoint:first-of-type{border-top:0}.verb{display:inline-block;min-width:48px;text-align:center;border-radius:6px;padding:3px 6px;font:800 11px ui-monospace,monospace;margin-right:7px}.post{background:#443719;color:#ffdb7a}.get{background:#143c32;color:#9cf5d0}.endpoint-path{font:700 12px ui-monospace,monospace;overflow-wrap:anywhere}.doc-endpoint p{font-size:12px;color:var(--muted);margin:7px 0 0}.field-list{font-size:12px;color:var(--muted);padding-left:18px;margin:8px 0}.field-list code{color:#dce6f6}.small{font-size:11px;color:var(--muted)}.hide{display:none}.foot{text-align:center;color:#71809b;font-size:11px;margin:18px 0 4px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.top{align-items:flex-start}.toplinks{flex-direction:column}.toplinks .nav{justify-content:center}}
+@media(max-width:480px){body{padding:12px}.top{padding:14px;gap:10px}.mark{width:40px;height:40px;flex-basis:40px}.toplinks{display:none}.row{align-items:stretch}.method{flex-basis:92px}.toolbar .btn{flex:1}.card{border-radius:14px}}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+  <div class="mark" aria-hidden="true">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12a4 4 0 0 1 4-4h3"/><path d="M16 12a4 4 0 0 1-4 4H9"/><path d="m14 5 3 3-3 3M10 13l-3 3 3 3"/></svg>
+  </div>
+  <div><h1>API Sandbox</h1><p class="subtitle">Explore, edit, and run requests against this Vernam Share instance.</p></div>
+  <nav class="toplinks"><a class="nav" href="/">Main app</a><a class="nav" href="/">Client encryption</a></nav>
+</header>
+
+<div class="layout">
+<section>
+  <div class="card">
+    <h2 class="section-title">Request builder</h2>
+    <p class="intro">Choose an example, edit the request, then send it to the current origin. Requests run directly from this page.</p>
+    <div class="presets" aria-label="Request examples">
+      <button class="preset" data-preset="create">Create message</button>
+      <button class="preset" data-preset="cipherx">Store cipherx</button>
+      <button class="preset" data-preset="retrieve">Retrieve message</button>
+      <button class="preset" data-preset="health">Health check</button>
+    </div>
+    <div class="row">
+      <div class="method"><label for="method">Method</label><select id="method"><option>GET</option><option>POST</option></select></div>
+      <div class="path"><label for="path">Path</label><input id="path" spellcheck="false" value="/healthz" /></div>
+    </div>
+    <label for="headers">Headers (JSON)</label>
+    <textarea id="headers" spellcheck="false" style="min-height:76px">{
+  "Accept": "application/json"
+}</textarea>
+    <label for="body">Request body (JSON)</label>
+    <textarea id="body" spellcheck="false">{
+  "message": "Hello from the API sandbox",
+  "maxViews": 3
+}</textarea>
+    <section id="cipherxGenerator" class="generator hide" aria-labelledby="generatorTitle">
+      <h3 id="generatorTitle">Generate cipherx + key</h3>
+      <p class="help">Enter plaintext, then generate a fresh random one-time key and matching cipherx. Only cipherx is added to the API request; the key stays here.</p>
+      <label for="generatorPlaintext">Plaintext</label>
+      <textarea id="generatorPlaintext" placeholder="Type the message to encrypt…">Hello from the API sandbox</textarea>
+      <div class="toolbar">
+        <button class="btn" id="generateCipherxBtn" type="button">⚡ Generate cipherx + key</button>
+      </div>
+      <label for="generatedCipherx">Generated cipherx (base64url)</label>
+      <textarea id="generatedCipherx" class="generated" readonly placeholder="Generated cipherx will appear here"></textarea>
+      <div class="toolbar">
+        <button class="btn secondary" id="copyCipherxBtn" type="button">Copy cipherx</button>
+      </div>
+      <label for="generatedKey">Generated key (base64url)</label>
+      <textarea id="generatedKey" class="generated" readonly placeholder="Generated key will appear here"></textarea>
+      <div class="toolbar">
+        <button class="btn secondary" id="copyKeyBtn" type="button">Copy key</button>
+      </div>
+      <p class="help" id="generatorStatus" role="status" aria-live="polite"></p>
+    </section>
+    <div class="toolbar">
+      <button class="btn" id="sendBtn">▶ Send request</button>
+      <button class="btn secondary" id="curlBtn">Copy cURL</button>
+      <button class="btn secondary" id="resetBtn">Reset example</button>
+    </div>
+    <div class="note"><strong>Heads up:</strong> a successful <code>GET /api/messages/{id}</code> consumes one view. The message is deleted when its configured view limit is reached. Use a test message and low-risk content.</div>
+    <label>Equivalent cURL</label>
+    <pre class="code" id="curlPreview">curl -i http://localhost:8080/healthz</pre>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Response</h2>
+    <p class="intro">Status, elapsed time, headers, and response body from the last request.</p>
+    <div class="response-head"><span class="status" id="status">Not sent</span><span class="small" id="elapsed">—</span><span class="small" id="responseUrl"></span></div>
+    <div class="tabs"><button class="tab active" data-tab="responseBody">Body</button><button class="tab" data-tab="responseHeaders">Headers</button></div>
+    <pre class="code" id="responseBody">Send a request to see the response here.</pre>
+    <pre class="code hide" id="responseHeaders">No response yet.</pre>
+    <div class="toolbar"><button class="btn secondary" id="copyResponseBtn">Copy response</button></div>
+  </div>
+</section>
+
+<aside>
+  <div class="card">
+    <h2 class="section-title">API reference</h2>
+    <p class="intro">These endpoints are served by the current app. The sandbox does not add or modify API routes.</p>
+    <div class="doc-endpoint">
+      <span class="verb post">POST</span><span class="endpoint-path">/api/messages</span>
+      <p>Creates a message using server-side encryption. The server receives plaintext and returns a secret key to the sender.</p>
+      <ul class="field-list"><li><code>message</code> — required, non-empty string</li><li><code>maxViews</code> — optional integer, 1–1000; default 1</li></ul>
+      <pre class="code">{
+  "message": "secret text",
+  "maxViews": 3
+}</pre>
+      <p>Success: <code>201 Created</code> with <code>id</code>, <code>key</code>, <code>expiresIn</code>, and view counters.</p>
+    </div>
+    <div class="doc-endpoint">
+      <span class="verb post">POST</span><span class="endpoint-path">/api/cipherxs</span>
+      <p>Stores cipherx produced by the browser. This endpoint accepts cipherx only; it does not receive plaintext or the one-time key.</p>
+      <ul class="field-list"><li><code>cipherx</code> — required, unpadded base64url string representing 1 byte to 1 MiB</li><li><code>maxViews</code> — optional integer, 1–1000; default 1</li></ul>
+      <pre class="code">{
+  "cipherx": "c2FtcGxl",
+  "maxViews": 3
+}</pre>
+      <p>Success: <code>201 Created</code> with <code>id</code>, <code>expiresIn</code>, and view counters; no key is returned.</p>
+    </div>
+    <div class="doc-endpoint">
+      <span class="verb get">GET</span><span class="endpoint-path">/api/messages/{id}</span>
+      <p>Retrieves cipherx and increments the view count. Decryption happens in the recipient's browser using the key in the URL fragment.</p>
+      <p>Success: <code>200 OK</code> with <code>cipherx</code>, timestamps, <code>maxViews</code>, <code>viewsUsed</code>, and <code>viewsRemaining</code>. Missing, expired, or exhausted messages return <code>404</code>.</p>
+    </div>
+    <div class="doc-endpoint">
+      <span class="verb get">GET</span><span class="endpoint-path">/healthz</span>
+      <p>Simple health check.</p>
+      <pre class="code">{"status":"ok"}</pre>
+    </div>
+  </div>
+  <div class="card">
+    <h2 class="section-title">Usage notes</h2>
+    <ul class="field-list">
+      <li>All paths are relative to the current origin, so the sandbox works when hosted behind a reverse proxy or under a subpath.</li>
+      <li>For JSON requests, use <code>Content-Type: application/json</code>.</li>
+      <li>Message storage is in memory; restarting the service clears stored messages.</li>
+      <li>Message expiry defaults to 24 hours and can be changed with <code>MESSAGE_TTL</code>.</li>
+      <li>The cipherx endpoint is intended for cipherx generated with the matching key. Arbitrary sample cipherx can be stored but will not decrypt into meaningful text.</li>
+      <li>Use HTTPS for real secrets. Never paste a real one-time key into headers or request bodies.</li>
+    </ul>
+  </div>
+</aside>
+</div>
+<p class="foot">Vernam Share · API Sandbox · Requests are sent only when you press Send request.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const examples={
+  create:{method:'POST',path:'/api/messages',headers:{Accept:'application/json','Content-Type':'application/json'},body:{message:'Hello from the API sandbox',maxViews:3}},
+  cipherx:{method:'POST',path:'/api/cipherxs',headers:{Accept:'application/json','Content-Type':'application/json'},body:{cipherx:'c2FtcGxl',maxViews:3}},
+  retrieve:{method:'GET',path:'/api/messages/PASTE_MESSAGE_ID',headers:{Accept:'application/json'},body:null},
+  health:{method:'GET',path:'/healthz',headers:{Accept:'application/json'},body:null}
+};
+let currentExample='health';
+let lastResponse='';
+function setExample(name){
+  const x=examples[name];if(!x)return;
+  currentExample=name;
+  $('method').value=x.method;$('path').value=x.path;
+  $('headers').value=JSON.stringify(x.headers,null,2);
+  $('body').value=x.body===null?'':JSON.stringify(x.body,null,2);
+  $('body').disabled=x.body===null;
+  $('cipherxGenerator').classList.toggle('hide',name!=='cipherx');
+  document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset===name));
+  updateCurl();
+}
+function encodeBase64Url(bytes){
+  let binary='';
+  const chunkSize=0x8000;
+  for(let i=0;i<bytes.length;i+=chunkSize){
+    binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+chunkSize,bytes.length)));
+  }
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function secureRandomBytes(length){
+  const bytes=new Uint8Array(length);
+  for(let offset=0;offset<length;offset+=65536){
+    crypto.getRandomValues(bytes.subarray(offset,Math.min(offset+65536,length)));
+  }
+  return bytes;
+}
+function generateCipherx(){
+  const text=$('generatorPlaintext').value;
+  const plain=new TextEncoder().encode(text);
+  if(!plain.length){$('generatorStatus').textContent='Enter some plaintext first.';$('generatorPlaintext').focus();return;}
+  if(plain.length>1048576){$('generatorStatus').textContent='Plaintext exceeds the 1 MiB API limit.';return;}
+  const key=secureRandomBytes(plain.length);
+  const cipher=new Uint8Array(plain.length);
+  for(let i=0;i<plain.length;i++)cipher[i]=plain[i]^key[i];
+  const cipherx=encodeBase64Url(cipher);
+  const keyText=encodeBase64Url(key);
+  $('generatedCipherx').value=cipherx;
+  $('generatedKey').value=keyText;
+  let body={};
+  try{body=JSON.parse($('body').value||'{}');}catch{}
+  if(!body||typeof body!=='object'||Array.isArray(body))body={};
+  body.cipherx=cipherx;
+  if(!Number.isInteger(body.maxViews)||body.maxViews<1||body.maxViews>1000)body.maxViews=3;
+  $('body').value=JSON.stringify(body,null,2);
+  $('generatorStatus').textContent='Generated '+plain.length+' bytes. Cipherx was copied into the request body; the key is not sent.';
+  updateCurl();
+}
+async function copyField(id,buttonId,label){
+  const button=$(buttonId);
+  if(!$(id).value){$('generatorStatus').textContent='Generate cipherx and key first.';return;}
+  try{
+    await navigator.clipboard.writeText($(id).value);
+    button.textContent='Copied';
+    setTimeout(()=>button.textContent=label,1300);
+  }catch{
+    $(id).focus();$(id).select();
+    $('generatorStatus').textContent='Clipboard unavailable; select and copy the field manually.';
+  }
+}
+function requestData(){
+  const method=$('method').value;
+  let path=$('path').value.trim();
+  if(!path)throw Error('Path is required.');
+  if(!path.startsWith('/'))path='/'+path;
+  if(path.startsWith('//')||path.includes('://'))throw Error('Use a relative path on this server.');
+  const headers=JSON.parse($('headers').value||'{}');
+  if(!headers||typeof headers!=='object'||Array.isArray(headers))throw Error('Headers must be a JSON object.');
+  let body;
+  if(method!=='GET'&&$('body').value.trim())body=JSON.parse($('body').value);
+  return {method,path,headers,body,url:new URL(path,location.origin).toString()};
+}
+function shellQuote(s){return "'"+String(s).replace(/'/g,"'\\''")+"'";}
+function curlText(r){
+  let cmd='curl -i -X '+r.method+' '+shellQuote(r.url);
+  for(const [k,v] of Object.entries(r.headers))cmd+=' \\\n  -H '+shellQuote(k+': '+v);
+  if(r.body!==undefined)cmd+=' \\\n  --data '+shellQuote(JSON.stringify(r.body));
+  return cmd;
+}
+function updateCurl(){
+  try{$('curlPreview').textContent=curlText(requestData());}
+  catch(e){$('curlPreview').textContent='Request preview unavailable: '+e.message;}
+}
+async function sendRequest(){
+  let r;
+  try{r=requestData();}catch(e){$('status').className='status bad';$('status').textContent='Invalid request';$('responseBody').textContent=e.message;return;}
+  const btn=$('sendBtn');btn.disabled=true;btn.textContent='Sending…';
+  $('status').className='status';$('status').textContent='Sending';$('responseBody').textContent='Waiting for response…';$('responseHeaders').textContent='';$('responseUrl').textContent=r.method+' '+r.path;
+  const started=performance.now();
+  try{
+    const init={method:r.method,headers:r.headers,cache:'no-store'};
+    if(r.body!==undefined)init.body=JSON.stringify(r.body);
+    const response=await fetch(r.path,init);
+    const elapsed=Math.round(performance.now()-started);
+    const raw=await response.text();
+    lastResponse=raw;
+    let pretty=raw;
+    try{pretty=JSON.stringify(JSON.parse(raw),null,2);}catch{}
+    $('status').className='status '+(response.ok?'ok':'bad');
+    $('status').textContent=response.status+' '+response.statusText;
+    $('elapsed').textContent=elapsed+' ms';
+    $('responseBody').textContent=pretty||'(empty response body)';
+    $('responseHeaders').textContent=[...response.headers.entries()].map(([k,v])=>k+': '+v).join('\n')||'(no readable response headers)';
+  }catch(e){
+    lastResponse=String(e);
+    $('status').className='status bad';$('status').textContent='Network error';
+    $('elapsed').textContent=Math.round(performance.now()-started)+' ms';
+    $('responseBody').textContent=e.message+'\n\nThe browser could not complete this request. Check that the server is running and the path is same-origin.';
+    $('responseHeaders').textContent='No response headers received.';
+  }finally{btn.disabled=false;btn.textContent='▶ Send request';}
+}
+document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>setExample(b.dataset.preset)));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===b));
+  $('responseBody').classList.toggle('hide',b.dataset.tab!=='responseBody');
+  $('responseHeaders').classList.toggle('hide',b.dataset.tab!=='responseHeaders');
+}));
+$('sendBtn').addEventListener('click',sendRequest);
+$('generateCipherxBtn').addEventListener('click',generateCipherx);
+$('copyCipherxBtn').addEventListener('click',()=>copyField('generatedCipherx','copyCipherxBtn','Copy cipherx'));
+$('copyKeyBtn').addEventListener('click',()=>copyField('generatedKey','copyKeyBtn','Copy key'));
+$('curlBtn').addEventListener('click',async()=>{updateCurl();try{await navigator.clipboard.writeText($('curlPreview').textContent);$('curlBtn').textContent='Copied';setTimeout(()=>$('curlBtn').textContent='Copy cURL',1300);}catch{$('curlBtn').textContent='Clipboard unavailable';setTimeout(()=>$('curlBtn').textContent='Copy cURL',1300);}});
+$('resetBtn').addEventListener('click',()=>setExample(currentExample));
+$('copyResponseBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(lastResponse||$('responseBody').textContent);$('copyResponseBtn').textContent='Copied';setTimeout(()=>$('copyResponseBtn').textContent='Copy response',1300);}catch{$('copyResponseBtn').textContent='Clipboard unavailable';setTimeout(()=>$('copyResponseBtn').textContent='Copy response',1300);}});
+['method','path','headers','body'].forEach(id=>$(id).addEventListener('input',updateCurl));
+$('method').addEventListener('change',()=>{$('body').disabled=$('method').value==='GET';updateCurl();});
+setExample('health');
+</script>
+</body>
+</html>

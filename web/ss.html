@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Vernam Share — Server-side encryption</title>
+<style>
+:root{color-scheme:dark;--bg:#0a0d14;--panel:#121826;--line:#293348;--text:#edf2ff;--muted:#98a6c3;--accent:#9cf5d0;--danger:#ff9a9a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#1a2840 0,#0a0d14 55%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;display:grid;place-items:center;padding:24px}
+main{width:min(760px,100%)}
+.brand{position:relative;display:flex;align-items:center;gap:16px;margin:0 0 27px;padding:16px 19px;border:1px solid #35465b;border-radius:20px;background:linear-gradient(120deg,#172438ed 0%,#101827e8 58%,#172b31e8 100%);box-shadow:0 14px 42px #0004,inset 0 1px #ffffff0c;overflow:hidden}
+.brand:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#fff0a4,#d4a64a 45%,#9cf5d0);box-shadow:0 0 18px #9cf5d055}
+.brand:after{content:"";position:absolute;width:190px;height:190px;right:-65px;top:-120px;border-radius:50%;border:1px solid #9cf5d018;box-shadow:0 0 0 18px #9cf5d008,0 0 0 38px #9cf5d005;pointer-events:none}
+.brand-mark{position:relative;flex:0 0 62px;width:62px;height:62px;display:grid;place-items:center;border-radius:19px;background:linear-gradient(145deg,#263d50,#111c2b 65%,#203c3b);border:1px solid #69858a;box-shadow:inset 0 1px #ffffff30,0 5px 20px #0005,0 0 24px #9cf5d012}
+.brand-mark svg{width:52px;height:52px;display:block;filter:drop-shadow(0 2px 4px #0008)}
+.brand-copy{position:relative;min-width:0;flex:1}.brand h1{font-size:clamp(21px,3.6vw,27px);line-height:1.08;margin:0;letter-spacing:-.045em;font-weight:850;background:linear-gradient(100deg,#fff8df 0%,#f1d58c 35%,#ffffff 68%,#a9f5dc 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 5px 20px #0002}.brand p{color:#a7b8cc;font-size:12px;letter-spacing:.09em;text-transform:uppercase;margin:7px 0 0}.brand-tag{position:relative;z-index:1;align-self:flex-start;white-space:nowrap;border:1px solid #52796f;background:#122c2a;color:#aaf5d7;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:480px){.brand{gap:12px;padding:14px 13px}.brand-mark{flex-basis:52px;width:52px;height:52px;border-radius:16px}.brand-mark svg{width:44px;height:44px}.brand-tag{display:none}.brand p{font-size:10px;letter-spacing:.06em}}
+.card{background:#111827eF;border:1px solid var(--line);border-radius:22px;padding:clamp(20px,4vw,34px);box-shadow:0 22px 80px #0005}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--accent);font-weight:700}
+.intro-row{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.intro-row .intro-title{margin:0}
+.intro-delimiter{color:var(--accent);font-size:11px;font-weight:700;letter-spacing:0;white-space:pre}
+h2{font-size:clamp(25px,5vw,36px);line-height:1.12;margin:9px 0 12px}p{color:var(--muted)}label{display:block;font-weight:650;margin:22px 0 8px}textarea,input{font:inherit;color:var(--text);background:#0a101c;border:1px solid #33415a;border-radius:12px;width:100%;padding:14px;outline:none}textarea{min-height:160px;resize:vertical}textarea:focus,input:focus{border-color:var(--accent)}.password-tools{margin-top:14px}.views-tools{margin-top:14px}.views-tools>label{margin:0 0 8px;font-size:14px}.views-tools input{max-width:150px}.views-tools .small{display:block;margin-top:7px;min-height:18px;color:var(--muted)}.password-tools>label{margin:0 0 8px;font-size:14px}.password-controls{display:flex;align-items:stretch;gap:10px}.password-controls input{width:104px;flex:0 0 104px;padding:10px 12px}.password-controls button{flex:1}.password-tools .small{display:block;margin-top:7px;min-height:18px;color:var(--muted)}@media(max-width:420px){.password-controls{flex-wrap:wrap}.password-controls input{width:100%;flex:1 1 100%}.password-controls button{width:100%}}button{font:inherit;font-weight:750;border:0;border-radius:12px;padding:13px 18px;cursor:pointer;background:var(--accent);color:#07150f}button.secondary{background:#202b3e;color:var(--text);border:1px solid #39465d}button:disabled{opacity:.55;cursor:wait}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.create-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:12px;margin-top:18px}
+.create-actions .views-tools{min-width:0;margin-top:0;align-self:start}
+.views-control-row{display:flex;align-items:center;gap:12px;min-height:48px}
+.create-actions .views-tools label{flex:1;min-width:0;margin:0;font-size:14px;line-height:1.3;color:#dce6f6}
+.create-actions .views-tools input{flex:0 0 88px;width:88px;max-width:88px;height:48px;padding:10px 12px;text-align:center;font-variant-numeric:tabular-nums}
+.create-actions .views-tools .small{display:block;margin-top:7px;min-height:18px;color:var(--muted);font-size:12px;line-height:1.4}
+.create-link-btn{width:100%;min-width:0;height:48px;padding:0;display:grid;place-items:center;border:1px solid #3d9a7d;border-radius:14px;background:linear-gradient(180deg,#9cf5d0,#59caa3);color:#07150f;box-shadow:0 5px 14px #0003;transition:filter .18s ease,transform .18s ease,box-shadow .18s ease}
+.create-link-btn svg{width:24px;height:24px;display:block;pointer-events:none}
+.create-link-btn:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px);box-shadow:0 7px 18px #0004}
+.create-link-btn:active:not(:disabled){transform:translateY(0)}
+.create-link-btn:disabled{opacity:.7;cursor:wait;transform:none}
+.create-link-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:480px){.create-actions{gap:10px}.create-actions .views-tools label{font-size:13px}.create-actions .views-tools input{flex-basis:76px;width:76px;max-width:76px;padding:9px 8px}.create-link-btn{width:100%;height:46px;min-width:0}}
+.notice{margin-top:16px;padding:13px 15px;border:1px solid var(--line);border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}.notice.error{color:var(--danger)}.notice.success{color:var(--accent)}.small{font-size:13px}.hidden{display:none}.link{display:flex;gap:8px;margin-top:8px}.link input{min-width:0}.pill{display:inline-block;border:1px solid #345b50;color:var(--accent);border-radius:999px;padding:4px 9px;font-size:12px}.foot{font-size:12px;text-align:center;color:#71809b;margin-top:18px}.mono{font-family:ui-monospace,SFMono-Regular,monospace}
+
+.qr-panel{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:20px;padding:18px;background:#0a101c;border:1px solid #293348;border-radius:16px}
+.qr-wrap{position:relative;width:240px;height:240px;padding:8px;background:#fff;border-radius:10px;display:grid;place-items:center}
+#qrCode{width:224px;height:224px;display:grid;place-items:center}
+#qrCode canvas,#qrCode img{max-width:224px;max-height:224px;display:block}
+.qr-download{margin-top:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 15px;border:1px solid #b98531;border-radius:10px;background:linear-gradient(180deg,#f8d77c,#c58b2d);color:#20180a;font-weight:800;cursor:pointer}.qr-download:hover:not(:disabled){filter:brightness(1.06)}.qr-download:disabled{opacity:.55;cursor:wait}.qr-download svg{width:17px;height:17px}
+
+</style>
+</head>
+<body>
+<main>
+  <header class="brand" aria-label="Vernam Share">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="brandGold" x1="12" y1="7" x2="51" y2="57" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF1B2"/><stop offset=".34" stop-color="#E9BC5D"/><stop offset=".7" stop-color="#A96A20"/><stop offset="1" stop-color="#FFE8A0"/></linearGradient>
+          <linearGradient id="brandMint" x1="14" y1="12" x2="50" y2="53" gradientUnits="userSpaceOnUse"><stop stop-color="#E3FFF5"/><stop offset="1" stop-color="#69DDBB"/></linearGradient>
+        </defs>
+        <circle cx="32" cy="32" r="25" stroke="#9CF5D0" stroke-opacity=".2"/>
+        <circle cx="32" cy="32" r="20.5" stroke="url(#brandGold)" stroke-opacity=".68" stroke-width="1.2" stroke-dasharray="2.5 3.5"/>
+        <path d="M32 7.5 52 19v26L32 56.5 12 45V19L32 7.5Z" stroke="url(#brandGold)" stroke-width="1.7" fill="#132332" fill-opacity=".7"/>
+        <path d="M32 15.5 45 23v17L32 47.5 19 40V23l13-7.5Z" fill="#0D1927" stroke="#6D9B91" stroke-opacity=".8"/>
+        <path d="M35.5 25a7.5 7.5 0 1 0 6.7 10.9l5.3 5.3v4h-4v-3h-3v-3h-3.2A7.5 7.5 0 0 0 35.5 25Z" fill="url(#brandGold)" stroke="#FFE9A1" stroke-width=".7" stroke-linejoin="round" transform="translate(-5 -3)"/>
+        <circle cx="29.5" cy="29.5" r="2.1" fill="#182638"/>
+        <path d="M18 18 22 22M46 42l4 4" stroke="url(#brandMint)" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="49" cy="15" r="2" fill="#9CF5D0"/><circle cx="14" cy="42" r="1.5" fill="#E9BC5D"/>
+      </svg>
+    </div>
+    <div class="brand-copy"><h1>Vernam Share</h1><p>s · Private by design</p></div>
+    <span class="brand-tag">Encrypted</span>
+  </header>
+  <section class="card" id="createView">
+    <div class="intro-row">
+      <div class="eyebrow">Private by design</div>
+      <span class="intro-delimiter" aria-hidden="true"> · </span>
+      <h2 class="eyebrow intro-title">Send a message that disappears.</h2>
+    </div>
+    
+    <div class="password-tools">
+      <label for="passwordLength">Password length</label>
+      <div class="password-controls">
+        <input id="passwordLength" type="number" min="4" max="256" value="24" inputmode="numeric" aria-label="Generated password length">
+        <button type="button" class="secondary" id="generatePasswordBtn">Generate password</button>
+      </div>
+      <div id="passwordStatus" class="small password-status" role="status" aria-live="polite">Generate a 24-character password and place it in the message field.</div>
+    </div>
+    <label for="message">Your message</label>
+    <textarea id="message" maxlength="1048576" placeholder="Write a message…"></textarea>
+    <div class="create-actions">
+      <div class="views-tools">
+        <div class="views-control-row">
+          <label for="maxViews">Views before deletion</label>
+          <input id="maxViews" type="number" min="1" max="1000" value="1" inputmode="numeric" aria-label="Number of allowed views">
+        </div>
+        <div id="viewsStatus" class="small" role="status" aria-live="polite">1 view allowed before deletion.</div>
+      </div>
+      <button id="createBtn" class="create-link-btn" type="button" aria-label="Create one-time link" title="Create one-time link">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a4.2 4.2 0 0 0 5.9 0l3-3a4.2 4.2 0 0 0-5.9-5.9l-1.7 1.7M13.4 10.6a4.2 4.2 0 0 0-5.9 0l-3 3a4.2 4.2 0 0 0 5.9 5.9l1.7-1.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div id="createResult" class="hidden"></div>
+  </section>
+  <section class="card hidden" id="readView">
+    <div class="eyebrow"></div>
+    <h2 id="readTitle">Retrieving message…</h2>
+    <p id="readDesc">This message is deleted after its allowed number of views.</p>
+    <div id="readResult" class="notice">Loading…</div>
+    <div class="actions"><button class="secondary" id="copyMessageBtn" disabled>Copy message</button><button class="secondary" id="backBtn">Create a new message</button></div>
+    <div id="copyMessageStatus" class="small" role="status" aria-live="polite"></div>
+  </section>
+  <p class="foot"><br><a href="/">Client-side encryption</a> · <a href="/api-sandbox.html">API Sandbox</a></p>
+</main>
+<script src="/qr.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const enc = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const dec = str => {
+  const normalized = str.replace(/-/g,'+').replace(/_/g,'/');
+  const raw = atob(normalized + '='.repeat((4-normalized.length%4)%4));
+  return Uint8Array.from(raw, c=>c.charCodeAt(0));
+};
+const xor = (a,b) => { if(a.length!==b.length) throw Error('Invalid key length'); const out=new Uint8Array(a.length); for(let i=0;i<a.length;i++)out[i]=a[i]^b[i]; return out; };
+const show = (el, yes=true) => el.classList.toggle('hidden',!yes);
+function setNotice(el, text, type='') { el.textContent=text; el.className='notice '+type; }
+function absoluteURL(id,key){ return location.origin + location.pathname + '#id=' + encodeURIComponent(id) + '&key=' + encodeURIComponent(key); }
+
+async function createMessage(){
+  const message=$('message').value;
+  if(!message.trim()){ $('message').focus(); return; }
+  const maxViews=Number($('maxViews').value);
+  if(!Number.isInteger(maxViews)||maxViews<1||maxViews>1000){
+    $('viewsStatus').textContent='Choose between 1 and 1000 views.';
+    $('maxViews').focus();
+    return;
+  }
+  const btn=$('createBtn'); btn.disabled=true; btn.setAttribute('aria-busy','true');
+  try{
+    const res=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,maxViews})});
+    const data=await res.json();
+    if(!res.ok) throw Error(data.error||'Could not create message');
+    const url=absoluteURL(data.id,data.key);
+    let copied=false;
+    try{
+      await navigator.clipboard.writeText(url);
+      copied=true;
+    }catch{
+      const field=document.createElement('textarea');
+      field.value=url;
+      field.style.position='fixed';
+      field.style.opacity='0';
+      document.body.appendChild(field);
+      field.select();
+      try{copied=document.execCommand('copy');}catch{}
+      field.remove();
+    }
+    const result=$('createResult'); result.innerHTML='';
+    const notice=document.createElement('div'); notice.className='notice '+(copied?'success':''); notice.textContent='Link created. Views: '+data.viewsUsed+'/'+data.maxViews+' used; '+data.viewsRemaining+' remaining. Expires in '+data.expiresIn+'. Save it now; the key will not be shown again.'+(copied?' Link copied to clipboard.':' Automatic copying failed; use the Copy button below.'); result.append(notice);
+    const label=document.createElement('label'); label.textContent='One-time link'; result.append(label);
+    const wrap=document.createElement('div'); wrap.className='link';
+    const input=document.createElement('input'); input.readOnly=true; input.value=url; input.className='mono'; input.setAttribute('aria-label','One-time link');
+    const copy=document.createElement('button'); copy.textContent='Copy'; copy.onclick=async()=>{try{await navigator.clipboard.writeText(url);copy.textContent='Copied!';}catch{input.select();document.execCommand('copy');copy.textContent='Copied!';}};
+    wrap.append(input,copy); result.append(wrap);
+
+    const qrPanel=document.createElement('div'); qrPanel.className='qr-panel';
+    const qrWrap=document.createElement('div'); qrWrap.className='qr-wrap';
+    const qrHost=document.createElement('div'); qrHost.id='qrCode'; qrWrap.append(qrHost);
+    const keyBadge=document.createElement('div'); keyBadge.className='qr-key'; keyBadge.setAttribute('aria-label','Key icon');
+    keyBadge.innerHTML='<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="keyMetal" x1="8" y1="6" x2="38" y2="42" gradientUnits="userSpaceOnUse"><stop stop-color="#fff1a6"/><stop offset=".28" stop-color="#e8b94e"/><stop offset=".62" stop-color="#b87519"/><stop offset="1" stop-color="#ffe69a"/></linearGradient><linearGradient id="keyShade" x1="12" y1="10" x2="36" y2="38" gradientUnits="userSpaceOnUse"><stop stop-color="#fff8d8"/><stop offset="1" stop-color="#d7962a"/></linearGradient></defs><path d="M29.5 7.5a12 12 0 0 0-11.3 16.1L5.8 36a3.2 3.2 0 0 0 0 4.5l1.7 1.7a3.2 3.2 0 0 0 4.5 0l3.2-3.2 3.5 1 1-3.5 3.4-1 1-3.5 2.8-2.8A12 12 0 1 0 29.5 7.5Z" fill="#111827" opacity=".18" transform="translate(1 1.5)"/><path d="M29 5.5a12 12 0 0 0-11.3 16.1L5.3 34a3.2 3.2 0 0 0 0 4.5l1.7 1.7a3.2 3.2 0 0 0 4.5 0l3.2-3.2 3.5 1 1-3.5 3.4-1 1-3.5 2.8-2.8A12 12 0 1 0 29 5.5Z" fill="url(#keyMetal)" stroke="#8c5816" stroke-width="1.6" stroke-linejoin="round"/><path d="M29 10a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Z" fill="#fff0b1" opacity=".95"/><path d="M29 13.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" fill="#172033"/><path d="m8.7 35.1 4.2 4.2M14.2 29.7l4.2 4.2" stroke="#fff0b1" stroke-width="1.6" stroke-linecap="round" opacity=".9"/></svg>';
+    qrPanel.append(qrWrap);
+    if(window.QRCode){
+      new QRCode(qrHost,{text:url,width:224,height:224,colorDark:'#101827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+    }else{
+      qrHost.textContent='QR generation library could not load. Check that /qr.js is available.';
+      qrHost.style.cssText='width:224px;height:224px;color:#101827;font-size:12px;text-align:center;overflow-wrap:anywhere';
+    }
+    const downloadQR=document.createElement('button');
+    downloadQR.type='button';
+    downloadQR.className='qr-download';
+    downloadQR.disabled=true;
+    downloadQR.title='Preparing QR image';
+    downloadQR.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Download QR image';
+    // Draw the key badge into the QR canvas itself so it is part of the image and its download.
+    const keySvg=keyBadge.querySelector('svg');
+    if(keySvg){
+      keySvg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+      const svgText=new XMLSerializer().serializeToString(keySvg);
+      const iconImage=new Image();
+      iconImage.onload=()=>{
+        const qrCanvas=qrHost.querySelector('canvas');
+        if(!qrCanvas) return;
+        const ctx=qrCanvas.getContext('2d');
+        const size=56, x=(qrCanvas.width-size)/2, y=(qrCanvas.height-size)/2, radius=13;
+        ctx.save();
+        ctx.fillStyle='#ffffff'; ctx.strokeStyle='#111827'; ctx.lineWidth=2;
+        ctx.beginPath();
+        ctx.moveTo(x+radius,y);
+        ctx.arcTo(x+size,y,x+size,y+size,radius);
+        ctx.arcTo(x+size,y+size,x,y+size,radius);
+        ctx.arcTo(x,y+size,x,y,radius);
+        ctx.arcTo(x,y,x+size,y,radius);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.drawImage(iconImage,x+6,y+6,size-12,size-12);
+        ctx.restore();
+        // QRCode.js may display its generated <img> rather than the canvas; refresh it from the composited bitmap.
+        const visibleQRImage=qrHost.querySelector('img');
+        if(visibleQRImage) visibleQRImage.src=qrCanvas.toDataURL('image/png');
+        downloadQR.disabled=false;
+        downloadQR.title='Download QR image as PNG';
+      };
+      iconImage.onerror=()=>{ downloadQR.disabled=false; downloadQR.title='Download QR image as PNG'; };
+      iconImage.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgText);
+    }
+    downloadQR.addEventListener('click',()=>{
+      const canvas=qrHost.querySelector('canvas');
+      const image=qrHost.querySelector('img');
+      let dataURL='';
+      if(canvas){
+        // Export the complete white frame, including the 8px quiet zone around the QR modules.
+        const framed=document.createElement('canvas');
+        framed.width=240; framed.height=240;
+        const ctx=framed.getContext('2d');
+        ctx.fillStyle='#ffffff';
+        ctx.fillRect(0,0,framed.width,framed.height);
+        ctx.drawImage(canvas,8,8,224,224);
+        dataURL=framed.toDataURL('image/png');
+      }else if(image && image.src){
+        const framed=document.createElement('canvas');
+        framed.width=240; framed.height=240;
+        const ctx=framed.getContext('2d');
+        ctx.fillStyle='#ffffff';
+        ctx.fillRect(0,0,framed.width,framed.height);
+        ctx.drawImage(image,8,8,224,224);
+        dataURL=framed.toDataURL('image/png');
+      }
+      if(!dataURL){
+        setNotice(result,'QR image is not ready to download yet.','error');
+        return;
+      }
+      const link=document.createElement('a');
+      link.href=dataURL;
+      link.download='vernam-share-qr.png';
+      document.body.append(link);
+      link.click();
+      link.remove();
+    });
+    qrPanel.append(downloadQR);
+    result.append(qrPanel);
+    show(result);
+    $('message').value='';
+  }catch(e){show($('createResult'));setNotice($('createResult'),e.message,'error');}
+  finally{btn.disabled=false;btn.removeAttribute('aria-busy');}
+}
+async function readMessage(id,key){
+  show($('createView'),false); show($('readView'));
+  try{
+    const res=await fetch('/api/messages/'+encodeURIComponent(id),{cache:'no-store'});
+    const data=await res.json();
+    if(!res.ok) throw Error(data.error||'Message unavailable');
+    const plain=xor(dec(data.cipherx),dec(key));
+    const text=new TextDecoder('utf-8',{fatal:true}).decode(plain);
+    $('readTitle').textContent='Message retrieved';
+    $('readDesc').textContent='Views: '+data.viewsUsed+'/'+data.maxViews+' used; '+data.viewsRemaining+' remaining.'+(data.viewsRemaining===0?' This was the final allowed view.':'');
+    setNotice($('readResult'),text,'success');
+    $('copyMessageBtn').disabled=false;
+    $('copyMessageBtn').dataset.message=text;
+    $('copyMessageStatus').textContent='';
+  }catch(e){
+    $('readTitle').textContent='Message unavailable';
+    $('readDesc').textContent='The link may have expired, already been opened, or be invalid.';
+    setNotice($('readResult'),e.message,'error');
+  }
+}
+function generatePassword(length){
+  const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()-_=+[]{};:,.?';
+  const limit=256-(256%alphabet.length);
+  let result='';
+  while(result.length<length){
+    const bytes=new Uint8Array(Math.max(32,(length-result.length)*2));
+    crypto.getRandomValues(bytes);
+    for(const byte of bytes){
+      if(byte<limit){
+        result+=alphabet[byte%alphabet.length];
+        if(result.length===length) break;
+      }
+    }
+  }
+  return result;
+}
+function updatePasswordStatus(){
+  const input=$('passwordLength');
+  const length=Number(input.value);
+  $('passwordStatus').textContent=Number.isInteger(length)&&length>=4&&length<=256
+    ? 'Generate a '+length+'-character password and place it in the message field.'
+    : 'Choose a length between 4 and 256.';
+}
+$('passwordLength').addEventListener('input',updatePasswordStatus);
+$('passwordLength').addEventListener('change',updatePasswordStatus);
+function updateViewsStatus(){
+  const count=Number($('maxViews').value);
+  $('viewsStatus').textContent=Number.isInteger(count)&&count>=1&&count<=1000
+    ? count+' view'+(count===1?'':'s')+' allowed before deletion.'
+    : 'Choose between 1 and 1000 views.';
+}
+$('maxViews').addEventListener('input',updateViewsStatus);
+$('maxViews').addEventListener('change',updateViewsStatus);
+$('generatePasswordBtn').addEventListener('click',()=>{
+  const input=$('passwordLength');
+  const length=Number(input.value);
+  if(!Number.isInteger(length)||length<4||length>256){
+    $('passwordStatus').textContent='Choose a length between 4 and 256.';
+    input.focus();
+    return;
+  }
+  $('message').value=generatePassword(length);
+  $('passwordStatus').textContent='Generated a '+length+'-character password and placed it in the message field.';
+  $('message').focus();
+});
+$('createBtn').addEventListener('click',createMessage);
+$('copyMessageBtn').addEventListener('click',async()=>{
+  const btn=$('copyMessageBtn');
+  const text=btn.dataset.message;
+  if(text===undefined) return;
+  try{
+    await navigator.clipboard.writeText(text);
+    $('copyMessageStatus').textContent='Message copied to clipboard.';
+  }catch(e){
+    // Clipboard API may be unavailable outside a secure context.
+    const field=document.createElement('textarea');
+    field.value=text; field.style.position='fixed'; field.style.opacity='0';
+    document.body.appendChild(field); field.select();
+    const ok=document.execCommand('copy'); field.remove();
+    $('copyMessageStatus').textContent=ok?'Message copied to clipboard.':'Could not copy automatically. Select and copy the message manually.';
+  }
+});
+$('backBtn').addEventListener('click',()=>{history.replaceState(null,'',location.pathname);show($('readView'),false);show($('createView'));$('copyMessageBtn').disabled=true;delete $('copyMessageBtn').dataset.message;$('copyMessageStatus').textContent='';});
+// Reload the app whenever the URL fragment changes, so new one-time links are re-evaluated.
+window.addEventListener('hashchange',()=>window.location.reload());
+
+const params=new URLSearchParams(location.hash.slice(1));
+const id=params.get('id'), key=params.get('key');
+if(id && key){ readMessage(id,key); }
+</script>
+</body>
+</html>

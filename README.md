@@ -52,7 +52,7 @@ After building, copy **only the executable** to the target machine and run it. T
 Optional environment variables:
 
 ```sh
-ADDR=:8080 MESSAGE_TTL=24h ./vernam-share
+ADDR=:8080 MESSAGE_TTL=24h STORE_LIMIT=1000 ./vernam-share
 ```
 
 On Windows PowerShell:
@@ -60,10 +60,11 @@ On Windows PowerShell:
 ```powershell
 $env:ADDR=":8080"
 $env:MESSAGE_TTL="24h"
+$env:STORE_LIMIT="1000"
 .\vernam-share.exe
 ```
 
-`MESSAGE_TTL` accepts Go durations such as `30m`, `24h`, or `168h`.
+`MESSAGE_TTL` accepts Go durations such as `30m`, `24h`, or `168h`. `STORE_LIMIT` must be a positive integer and limits the total number of active messages held in memory; it defaults to `1000`. When the store is full, message creation endpoints return HTTP `503 Service Unavailable` until capacity is available.
 
 ## Build and run with Docker
 
@@ -105,9 +106,22 @@ go run .
 
 The embedded web assets are still used when running from source.
 
+## Default client-side page and server-side page
+
+The default page (`/` or `/index.html`) uses client-side encryption. Open `/ss.html` for the original server-side encryption page. That page encrypts the UTF-8 message using a fresh cryptographically random XOR one-time-pad key, then sends only the base64url cipherx and `maxViews` to `POST /api/cipherxs`. The key is never included in that request; it is put in the URL fragment by the browser. Generated links open the default client-side encryption page.
+
+The server-side page is available at `/ss.html`; its `POST /api/messages` endpoint remains available. `GET /api/messages/{id}`, `POST /api/cipherxs`, and `/healthz` remain available.
+
+
+QR generation is self-hosted: the bundled `web/qr.js` file is served locally by the Go app, so QR creation does not depend on an external CDN.
+
+## API sandbox
+
+Open `/api-sandbox.html` in the running app for an interactive API reference and request builder. It includes editable method/path/headers/body, example presets for each existing endpoint, live cURL preview/copy, and response status, timing, headers, and body. Requests are sent to the same origin; the sandbox does not introduce any new API routes.
+
 ## API
 
-Create:
+Create using the original server-side encryption endpoint:
 
 ```sh
 curl -s http://localhost:8080/api/messages \
@@ -115,7 +129,17 @@ curl -s http://localhost:8080/api/messages \
   -d '{"message":"secret text","maxViews":3}'
 ```
 
-`maxViews` is optional, defaults to `1`, and accepts values from `1` to `1000`. The response includes the ID, secret key, expiry, and view counters. The `key` is secret; never log or send it to the server again.
+Create using the new client-encrypted endpoint (the cipherx must already be base64url-encoded):
+
+```sh
+curl -s http://localhost:8080/api/cipherxs \
+  -H 'Content-Type: application/json' \
+  -d '{"cipherx":"BASE64URL_CIPHERX","maxViews":3}'
+```
+
+`POST /api/cipherxs` accepts cipherx only; the frontend encrypts the plaintext and keeps the one-time key in the URL fragment. The server does not receive the plaintext or key through this endpoint.
+
+`maxViews` is optional, defaults to `1`, and accepts values from `1` to `1000`. The original `/api/messages` create endpoint returns a secret key because it performs encryption on the server. The new `/api/cipherxs` endpoint returns an ID and view/expiry metadata, but no key.
 
 Retrieve a view:
 
@@ -125,7 +149,7 @@ curl -s http://localhost:8080/api/messages/MESSAGE_ID
 
 Each successful retrieval atomically increments `viewsUsed`. The message is deleted once `viewsUsed` reaches `maxViews`. The response includes `maxViews`, `viewsUsed`, and `viewsRemaining`.
 
-Health check: `GET /healthz`.
+Health check: `GET /healthz`. The JSON response includes `status`, `storeUsed` (currently stored, unexpired messages), and `storeLimit` (the configured capacity). Example: `{"status":"ok","storeUsed":12,"storeLimit":1000}`.
 
 ## Important security notes
 
@@ -140,3 +164,6 @@ Health check: `GET /healthz`.
 ## Why not AES?
 
 A correctly implemented one-time pad offers information-theoretic confidentiality, but key distribution is the hard part. This project follows the requested Vernam cipher. For most production applications, authenticated encryption (for example, XChaCha20-Poly1305) is easier to operate safely; if using a one-time pad, never reuse keys.
+
+
+The API sandbox's **Store cipherx** preset includes a client-side generator for matching base64url `cipherx` and one-time key values. It inserts only `cipherx` into the request body; the key remains local and is not submitted.

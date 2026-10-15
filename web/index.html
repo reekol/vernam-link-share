@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>Vernam Share</title>
+<title>Vernam Share — Client-side encryption</title>
 <style>
 :root{color-scheme:dark;--bg:#0a0d14;--panel:#121826;--line:#293348;--text:#edf2ff;--muted:#98a6c3;--accent:#9cf5d0;--danger:#ff9a9a}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#1a2840 0,#0a0d14 55%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;display:grid;place-items:center;padding:24px}
@@ -42,12 +42,6 @@ h2{font-size:clamp(25px,5vw,36px);line-height:1.12;margin:9px 0 12px}p{color:var
 #qrCode canvas,#qrCode img{max-width:224px;max-height:224px;display:block}
 .qr-download{margin-top:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 15px;border:1px solid #b98531;border-radius:10px;background:linear-gradient(180deg,#f8d77c,#c58b2d);color:#20180a;font-weight:800;cursor:pointer}.qr-download:hover:not(:disabled){filter:brightness(1.06)}.qr-download:disabled{opacity:.55;cursor:wait}.qr-download svg{width:17px;height:17px}
 
-
-.share-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
-.share-btn{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;min-width:42px;padding:0;border-radius:11px;border:1px solid #39465d;background:#202b3e;color:var(--text);cursor:pointer}
-.share-btn svg{width:21px;height:21px;display:block;flex:0 0 auto}
-.share-btn:hover{filter:brightness(1.15)}
-.share-btn.telegram{border-color:#267eaa}.share-btn.whatsapp{border-color:#25834c}.share-btn.facebook{border-color:#365fa6}.share-btn.slack{border-color:#6b4c7f}.share-btn.teams{border-color:#6264a7}.share-btn.viber{border-color:#7360f2}.share-btn.gmail{border-color:#c94b40}
 </style>
 </head>
 <body>
@@ -74,11 +68,11 @@ h2{font-size:clamp(25px,5vw,36px);line-height:1.12;margin:9px 0 12px}p{color:var
   </header>
   <section class="card" id="createView">
     <div class="intro-row">
-      <div class="eyebrow">Private by design</div>
+      <div class="eyebrow">Client-side encryption</div>
       <span class="intro-delimiter" aria-hidden="true"> · </span>
       <h2 class="eyebrow intro-title">Send a message that disappears.</h2>
     </div>
-    <p></p>
+    
     <div class="password-tools">
       <label for="passwordLength">Password length</label>
       <div class="password-controls">
@@ -111,12 +105,18 @@ h2{font-size:clamp(25px,5vw,36px);line-height:1.12;margin:9px 0 12px}p{color:var
     <div class="actions"><button class="secondary" id="copyMessageBtn" disabled>Copy message</button><button class="secondary" id="backBtn">Create a new message</button></div>
     <div id="copyMessageStatus" class="small" role="status" aria-live="polite"></div>
   </section>
-  <p class="foot">Use HTTPS in production. Anyone with the complete link can read the message.</p>
+  <p class="foot"><br><a href="/ss.html">Server-side encryption</a> · <a href="/api-sandbox.html">API Sandbox</a></p>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/qr.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const enc = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const enc = bytes => {
+  let binary='';
+  for(let offset=0;offset<bytes.length;offset+=0x8000){
+    binary+=String.fromCharCode(...bytes.subarray(offset,Math.min(offset+0x8000,bytes.length)));
+  }
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+};
 const dec = str => {
   const normalized = str.replace(/-/g,'+').replace(/_/g,'/');
   const raw = atob(normalized + '='.repeat((4-normalized.length%4)%4));
@@ -125,7 +125,18 @@ const dec = str => {
 const xor = (a,b) => { if(a.length!==b.length) throw Error('Invalid key length'); const out=new Uint8Array(a.length); for(let i=0;i<a.length;i++)out[i]=a[i]^b[i]; return out; };
 const show = (el, yes=true) => el.classList.toggle('hidden',!yes);
 function setNotice(el, text, type='') { el.textContent=text; el.className='notice '+type; }
-function absoluteURL(id,key){ return location.origin + location.pathname + '#id=' + encodeURIComponent(id) + '&key=' + encodeURIComponent(key); }
+function absoluteURL(id,key){
+  const path=location.pathname.replace(/client-encryption\.html$/,'');
+  const targetPath=path.endsWith('/')?path:path+'/';
+  return location.origin + targetPath + '#id=' + encodeURIComponent(id) + '&key=' + encodeURIComponent(key);
+}
+function secureRandomBytes(length){
+  const bytes=new Uint8Array(length);
+  for(let offset=0;offset<length;offset+=65536){
+    crypto.getRandomValues(bytes.subarray(offset,Math.min(offset+65536,length)));
+  }
+  return bytes;
+}
 
 async function createMessage(){
   const message=$('message').value;
@@ -138,10 +149,19 @@ async function createMessage(){
   }
   const btn=$('createBtn'); btn.disabled=true; btn.setAttribute('aria-busy','true');
   try{
-    const res=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,maxViews})});
+    const plain=new TextEncoder().encode(message);
+    if(plain.length>1048576) throw Error('Message exceeds 1 MiB.');
+    const key=secureRandomBytes(plain.length);
+    const cipherx=enc(xor(plain,key));
+    const keyText=enc(key);
+    const res=await fetch('/api/cipherxs',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({cipherx,maxViews})
+    });
     const data=await res.json();
     if(!res.ok) throw Error(data.error||'Could not create message');
-    const url=absoluteURL(data.id,data.key);
+    const url=absoluteURL(data.id,keyText);
     let copied=false;
     try{
       await navigator.clipboard.writeText(url);
@@ -157,44 +177,12 @@ async function createMessage(){
       field.remove();
     }
     const result=$('createResult'); result.innerHTML='';
-    const notice=document.createElement('div'); notice.className='notice '+(copied?'success':''); notice.textContent='Link created. Views: '+data.viewsUsed+'/'+data.maxViews+' used; '+data.viewsRemaining+' remaining. Expires in '+data.expiresIn+'. Save it now; the key will not be shown again.'+(copied?' Link copied to clipboard.':' Automatic copying failed; use the Copy button below.'); result.append(notice);
+    const notice=document.createElement('div'); notice.className='notice '+(copied?'success':''); notice.textContent='Link created. Views: '+data.viewsUsed+'/'+data.maxViews+' used; '+data.viewsRemaining+' remaining. Expires in '+data.expiresIn+'. Encryption happened in this browser; only cipherx was sent to the server.'+(copied?' Link copied to clipboard.':' Automatic copying failed; use the Copy button below.'); result.append(notice);
     const label=document.createElement('label'); label.textContent='One-time link'; result.append(label);
     const wrap=document.createElement('div'); wrap.className='link';
     const input=document.createElement('input'); input.readOnly=true; input.value=url; input.className='mono'; input.setAttribute('aria-label','One-time link');
     const copy=document.createElement('button'); copy.textContent='Copy'; copy.onclick=async()=>{try{await navigator.clipboard.writeText(url);copy.textContent='Copied!';}catch{input.select();document.execCommand('copy');copy.textContent='Copied!';}};
     wrap.append(input,copy); result.append(wrap);
-    const shareActions=document.createElement('div'); shareActions.className='share-actions';
-    const shareTargets=[
-      {name:'Teams',cls:'teams',url:u=>'https://teams.microsoft.com/share?href='+encodeURIComponent(u),svg:'<path fill="currentColor" d="M17.5 7.2a3.1 3.1 0 1 0 0-6.2 3.1 3.1 0 0 0 0 6.2ZM20.6 8H14a3.8 3.8 0 0 1-3.2 1.7H9v8.1c0 .7.6 1.2 1.2 1.2h6.9c.7 0 1.2-.5 1.2-1.2v-6.4h2.3c.7 0 1.2-.5 1.2-1.2V9.2c0-.7-.5-1.2-1.2-1.2ZM8.8 6.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4ZM13 8.2H4.2C2.4 8.2 1 9.6 1 11.4v7.4c0 1 .8 1.8 1.8 1.8h9.4c1 0 1.8-.8 1.8-1.8v-7.4c0-1.8-1.4-3.2-3-3.2Z"/>'},
-      {name:'Telegram',cls:'telegram',url:u=>'https://t.me/share/url?url='+encodeURIComponent(u),svg:'<path d="M21.8 4.2 18.5 20c-.2 1.1-.8 1.4-1.7.9l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.4-4.8 8.8-8c.4-.4-.1-.6-.6-.2L6.5 14 1.9 12.6c-1-.3-1-1 .2-1.5L20 4.1c.8-.3 1.9.2 1.8.1Z" fill="currentColor"/>'},
-      {name:'Slack',cls:'slack',url:u=>'https://slack.com/intl/en-gb/',svg:'<path d="M9.1 2.5a1.8 1.8 0 0 1 1.8 1.8v4.2H9.1a1.8 1.8 0 1 1 0-3.6h1.8V4.3a1.8 1.8 0 0 1-1.8-1.8ZM4.3 9.1h4.2v1.8a1.8 1.8 0 1 1-3.6 0V9.1H4.3a1.8 1.8 0 1 1 0-3.6h0ZM14.9 21.5a1.8 1.8 0 0 1-1.8-1.8v-4.2h1.8a1.8 1.8 0 1 1 0 3.6h-1.8v.6a1.8 1.8 0 0 1 1.8 1.8ZM19.7 14.9h-4.2v-1.8a1.8 1.8 0 1 1 3.6 0v1.8h.6a1.8 1.8 0 1 1 0 3.6h0Z" fill="currentColor"/><path d="M13.1 4.3a1.8 1.8 0 1 1 3.6 0v4.2h-3.6V4.3ZM19.7 9.1a1.8 1.8 0 1 1 0 3.6h-4.2V9.1h4.2ZM10.9 19.7a1.8 1.8 0 1 1-3.6 0v-4.2h3.6v4.2ZM4.3 10.9a1.8 1.8 0 1 1 0-3.6h4.2v3.6H4.3Z" fill="currentColor"/>'},
-      {name: 'Messenger',cls:'facebook',url:u=>'https://www.facebook.com/dialog/send?link='+encodeURIComponent(u),svg:'<path d="M13.5 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.4-.1-2.4 0-4.1 1.5-4.1 4.2v2.3H7.6v3.1h2.7v8h3.2Z" fill="currentColor"/>'},
-      {name:'WhatsApp',cls:'whatsapp',url:u=>'https://wa.me/?text='+encodeURIComponent(u),svg:'<path d="M20.5 3.5A11.8 11.8 0 0 0 2 17.7L.5 23.5l6-1.6a11.8 11.8 0 0 0 14-18.4ZM12 21a9 9 0 0 1-4.6-1.3l-.3-.2-3.5.9.9-3.4-.2-.4A9 9 0 1 1 12 21Zm5-6.7c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2s-.8 1-1 1.1-.4.2-.7 0a8.4 8.4 0 0 1-2.5-1.5 9.3 9.3 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6s-.7-1.7-1-2.3c-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.7s1.2 3.1 1.4 3.3c.2.2 2.3 3.5 5.6 4.9.8.4 1.5.6 2 .7.8.3 1.6.2 2.2.1.7-.1 1.8-.7 2.1-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.3-.6-.5Z" fill="currentColor"/>'},
-      {name:'Viber',cls:'viber',url:u=>'viber://forward?text='+encodeURIComponent(u),fallback:u=>'https://www.viber.com/',svg:'<path d="M19.4 4.6C17.8 3.1 15.2 2.5 12 2.5s-5.8.6-7.4 2.1C2.9 6.2 2.5 8.8 2.5 12s.4 5.8 2.1 7.4c.7.7 1.6 1.2 2.7 1.5l-.5 2.6 3.6-2.2h1.6c3.2 0 5.8-.6 7.4-2.1 1.7-1.6 2.1-4.2 2.1-7.4s-.4-5.8-2.1-7.2ZM8 7.1c.2-.2.4-.2.6-.1l1.4.7c.3.2.4.5.3.8l-.5 1c.5 1 1.3 1.8 2.3 2.3l1-.5c.3-.1.6 0 .8.3l.7 1.4c.1.2.1.5-.1.6-.5.5-1.2.8-1.9.7-2.8-.5-5.1-2.8-5.6-5.6-.1-.6.2-1.2 1-1.6Zm6.5 5.5a4.1 4.1 0 0 0-3.1-3.1V8a6.5 6.5 0 0 1 5 5h-1.9Zm0-4.5a8.4 8.4 0 0 1 4.5 4.5h-1.9a6.5 6.5 0 0 0-2.6-2.6V8.1Z" fill="currentColor"/>'},
-      {name:'Gmail',cls:'gmail',url:u=>'https://mail.google.com/mail/?view=cm&fs=1&su='+encodeURIComponent('')+'&body='+encodeURIComponent(u),svg:'<path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H7l5 3.8L17 4h1.5A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5H17V8.5l-5 3.8-5-3.8V20H5.5A2.5 2.5 0 0 1 3 17.5v-11Z" fill="currentColor"/><path d="m3.5 5.2 8.5 6.5 8.5-6.5" fill="none" stroke="#fff" stroke-width="1.5"/>'}
-    ];
-    for(const target of shareTargets){
-      const shareBtn=document.createElement('button'); shareBtn.type='button'; shareBtn.className='share-btn '+target.cls;
-      shareBtn.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+target.svg+'</svg>';
-      shareBtn.title=target.name;
-      shareBtn.setAttribute('aria-label',target.name);
-      shareBtn.addEventListener('click',()=>{
-        if(target.name==='Slack'){
-          // Slack does not provide a universal public share URL. Copy the secret link for pasting into the desired workspace.
-          navigator.clipboard.writeText(url).then(()=>{shareBtn.title='Copied for Slack';shareBtn.setAttribute('aria-label','Copied for Slack');setTimeout(()=>{shareBtn.title='Slack';shareBtn.setAttribute('aria-label','Slack');},1800);}).catch(()=>{input.select();document.execCommand('copy');shareBtn.title='Copied for Slack';shareBtn.setAttribute('aria-label','Copied for Slack');});
-          return;
-        }
-        if(target.name==='Viber'){
-          const opened=window.open(target.url(url),'_blank');
-          // If the app URI is unsupported, offer the Viber web/site fallback after a short delay.
-          setTimeout(()=>{ if(!opened || opened.closed) window.open(target.fallback(url),'_blank','noopener,noreferrer'); },700);
-          return;
-        }
-        window.open(target.url(url),'_blank','noopener,noreferrer,width=720,height=640');
-      });
-      shareActions.append(shareBtn);
-    }
-    result.append(shareActions);
 
     const qrPanel=document.createElement('div'); qrPanel.className='qr-panel';
     const qrWrap=document.createElement('div'); qrWrap.className='qr-wrap';
@@ -205,7 +193,7 @@ async function createMessage(){
     if(window.QRCode){
       new QRCode(qrHost,{text:url,width:224,height:224,colorDark:'#101827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
     }else{
-      qrHost.textContent='QR generation library could not load. Check your internet connection.';
+      qrHost.textContent='QR generation library could not load. Check that /qr.js is available.';
       qrHost.style.cssText='width:224px;height:224px;color:#101827;font-size:12px;text-align:center;overflow-wrap:anywhere';
     }
     const downloadQR=document.createElement('button');
@@ -291,7 +279,7 @@ async function readMessage(id,key){
     const res=await fetch('/api/messages/'+encodeURIComponent(id),{cache:'no-store'});
     const data=await res.json();
     if(!res.ok) throw Error(data.error||'Message unavailable');
-    const plain=xor(dec(data.ciphertext),dec(key));
+    const plain=xor(dec(data.cipherx),dec(key));
     const text=new TextDecoder('utf-8',{fatal:true}).decode(plain);
     $('readTitle').textContent='Message retrieved';
     $('readDesc').textContent='Views: '+data.viewsUsed+'/'+data.maxViews+' used; '+data.viewsRemaining+' remaining.'+(data.viewsRemaining===0?' This was the final allowed view.':'');
@@ -369,7 +357,7 @@ $('copyMessageBtn').addEventListener('click',async()=>{
 });
 $('backBtn').addEventListener('click',()=>{history.replaceState(null,'',location.pathname);show($('readView'),false);show($('createView'));$('copyMessageBtn').disabled=true;delete $('copyMessageBtn').dataset.message;$('copyMessageStatus').textContent='';});
 // Reload the app whenever the URL fragment changes, so new one-time links are re-evaluated.
-// window.addEventListener('hashchange',()=>window.location.reload());
+window.addEventListener('hashchange',()=>window.location.reload());
 
 const params=new URLSearchParams(location.hash.slice(1));
 const id=params.get('id'), key=params.get('key');
