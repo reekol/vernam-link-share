@@ -18,12 +18,19 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 )
 
 //go:embed web
 var embeddedWeb embed.FS
 
-const maxMessageBytes = 1 << 20 // 1 MiB
+const (
+	maxMessageSymbols = 1024
+	// A hard transport/storage ceiling for opaque client-generated cipherx.
+	// The server cannot recover plaintext symbol count from a one-time-pad
+	// ciphertext without the key, so this is deliberately a separate byte limit.
+	maxCipherxBytes = maxMessageSymbols * utf8.UTFMax
+)
 
 type Message struct {
 	Cipherx   string    `json:"cipherx"`
@@ -163,7 +170,7 @@ func (s *Server) create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, maxMessageBytes+4096)
+	r.Body = http.MaxBytesReader(w, r.Body, maxCipherxBytes+4096)
 	defer r.Body.Close()
 	var input struct {
 		Message  string `json:"message"`
@@ -187,9 +194,13 @@ func (s *Server) create(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "maxViews must be between 1 and 1000"})
 		return
 	}
+	if utf8.RuneCountInString(input.Message) > maxMessageSymbols {
+		writeJSON(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "message exceeds 1024 symbols"})
+		return
+	}
 	plain := []byte(input.Message)
-	if len(plain) > maxMessageBytes {
-		writeJSON(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "message exceeds 1 MiB"})
+	if len(plain) > maxCipherxBytes {
+		writeJSON(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "message exceeds the maximum UTF-8 size"})
 		return
 	}
 	key, err := randomBytes(len(plain))
@@ -231,8 +242,8 @@ func (s *Server) createCipherx(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	// Base64url expands a 1 MiB cipherx to about 1.4 MiB.
-	r.Body = http.MaxBytesReader(w, r.Body, maxMessageBytes*2+4096)
+	// Base64url expands opaque cipherx; cap the transport body before decoding.
+	r.Body = http.MaxBytesReader(w, r.Body, maxCipherxBytes*2+4096)
 	defer r.Body.Close()
 
 	var input struct {
@@ -254,8 +265,8 @@ func (s *Server) createCipherx(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "cipherx must be unpadded base64url"})
 		return
 	}
-	if len(cipherx) > maxMessageBytes {
-		writeJSON(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "cipherx exceeds 1 MiB"})
+	if len(cipherx) > maxCipherxBytes {
+		writeJSON(w, http.StatusRequestEntityTooLarge, map[string]string{"error": "cipherx exceeds the maximum allowed size"})
 		return
 	}
 	maxViews := 1
