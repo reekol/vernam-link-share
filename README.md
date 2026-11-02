@@ -106,12 +106,9 @@ go run .
 
 The embedded web assets are still used when running from source.
 
-## Default client-side page and server-side page
+## Client-side encryption
 
-The default page (`/` or `/index.html`) uses client-side encryption. Open `/ss.html` for the original server-side encryption page. That page encrypts the UTF-8 message using a fresh cryptographically random XOR one-time-pad key, then sends only the base64url cipherx and `maxViews` to `POST /api/cipherxs`. The key is never included in that request; it is put in the URL fragments by the browser. Generated links open the default client-side encryption page.
-
-The server-side page is available at `/ss.html`; its `POST /api/messages` endpoint remains available. `GET /api/messages/{id}`, `POST /api/cipherxs`, and `/healthz` remain available.
-
+The default page (`/` or `/index.html`) encrypts messages in the browser. The server stores only the base64url `cipherx` through `POST /api/cipherxs`; plaintext and the one-time key are not sent to the server.
 
 QR generation is self-hosted: the bundled `web/qr.js` file is served locally by the Go app, so QR creation does not depend on an external CDN.
 
@@ -139,7 +136,7 @@ curl -s http://localhost:8080/api/cipherxs \
 
 `POST /api/cipherxs` accepts cipherx only; the frontend encrypts the plaintext and keeps the one-time key in the URL fragments. The server does not receive the plaintext or key through this endpoint.
 
-`maxViews` is optional, defaults to `1`, and accepts values from `1` to `1000`. The original `/api/messages` create endpoint returns a secret key because it performs encryption on the server. The new `/api/cipherxs` endpoint returns an ID and view/expiry metadata, but no key.
+`maxViews` is optional, defaults to `1`, and accepts values from `1` to `1000`. `POST /api/cipherxs` returns an ID and view/expiry metadata, but no key.
 
 Retrieve a view:
 
@@ -153,7 +150,7 @@ Health check: `GET /healthz`. The JSON response includes `status`, `storeUsed` (
 
 ## Important security notes
 
-- **This is a true one-time pad only if the key is uniformly random, as long as the plaintext, kept secret, and never reused.** The implementation uses `crypto/rand`, generates a fresh key for every message, and does not persist keys.
+- **This is a true one-time pad only if the key is uniformly random, as long as the plaintext, kept secret, and never reused.** The browser generates a fresh key for every message; the server does not receive or persist keys.
 - The browser places the key in the URL **fragment** (`#id=...&key=...`). URL fragmentss are not sent in HTTP requests, so the server never receives the key when the recipient opens the link.
 - Anyone possessing the full URL can decrypt the message. Treat the URL like a password.
 - The in-memory store is lost on restart and is not shared across multiple service instances. Use a single instance or replace it with a shared store that supports atomic consume.
