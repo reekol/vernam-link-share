@@ -38,7 +38,7 @@ h2{font-size:clamp(25px,5vw,36px);line-height:1.12;margin:9px 0 12px}p{color:var
 
 .qr-panel{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:20px;padding:18px;background:#0a101c;border:1px solid #293348;border-radius:16px}
 .qr-wrap{position:relative;width:240px;height:240px;padding:8px;background:#fff;border-radius:10px;display:grid;place-items:center}
-#qrCode{width:224px;height:224px;display:grid;place-items:center}
+#qrCode{width:512px;height:512px;display:grid;place-items:center}
 #qrCode canvas,#qrCode img{max-width:224px;max-height:224px;display:block}
 .qr-download{margin-top:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 15px;border:1px solid #b98531;border-radius:10px;background:linear-gradient(180deg,#f8d77c,#c58b2d);color:#20180a;font-weight:800;cursor:pointer}.qr-download:hover:not(:disabled){filter:brightness(1.06)}.qr-download:disabled{opacity:.55;cursor:wait}.qr-download svg{width:17px;height:17px}
 
@@ -213,17 +213,17 @@ async function createMessage(){
         // The complete one-time-pad key is part of the URL, so use the largest
         // QR payload capacity available. QR is optional; link creation must not
         // fail if the URL is too large to encode.
-        new QRCode(qrHost,{text:url,width:224,height:224,colorDark:'#101827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L});
+        new QRCode(qrHost,{text:url,width:1024,height:1024,colorDark:'#101827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L});
         qrReady=true;
       }catch(e){
         qrError='This link is too large to fit in a QR code. The link was created successfully and can still be copied or shared.';
         qrHost.textContent=qrError;
-        qrHost.style.cssText='width:224px;height:224px;padding:14px;box-sizing:border-box;color:#8b1e2d;font-size:12px;text-align:center;overflow-wrap:anywhere';
+        qrHost.style.cssText='width:512px;height:512px;padding:14px;box-sizing:border-box;color:#8b1e2d;font-size:12px;text-align:center;overflow-wrap:anywhere';
       }
     }else{
       qrError='QR generation library could not load. Check that /qr.js is available.';
       qrHost.textContent=qrError;
-      qrHost.style.cssText='width:224px;height:224px;padding:14px;box-sizing:border-box;color:#101827;font-size:12px;text-align:center;overflow-wrap:anywhere';
+      qrHost.style.cssText='width:512px;height:512px;padding:14px;box-sizing:border-box;color:#101827;font-size:12px;text-align:center;overflow-wrap:anywhere';
     }
     if(qrError){
       const qrStatus=document.createElement('div');
