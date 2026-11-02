@@ -180,21 +180,37 @@ async function createMessage(){
     const keyBadge=document.createElement('div'); keyBadge.className='qr-key'; keyBadge.setAttribute('aria-label','Key icon');
     keyBadge.innerHTML='<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="keyMetal" x1="8" y1="6" x2="38" y2="42" gradientUnits="userSpaceOnUse"><stop stop-color="#fff1a6"/><stop offset=".28" stop-color="#e8b94e"/><stop offset=".62" stop-color="#b87519"/><stop offset="1" stop-color="#ffe69a"/></linearGradient><linearGradient id="keyShade" x1="12" y1="10" x2="36" y2="38" gradientUnits="userSpaceOnUse"><stop stop-color="#fff8d8"/><stop offset="1" stop-color="#d7962a"/></linearGradient></defs><path d="M29.5 7.5a12 12 0 0 0-11.3 16.1L5.8 36a3.2 3.2 0 0 0 0 4.5l1.7 1.7a3.2 3.2 0 0 0 4.5 0l3.2-3.2 3.5 1 1-3.5 3.4-1 1-3.5 2.8-2.8A12 12 0 1 0 29.5 7.5Z" fill="#111827" opacity=".18" transform="translate(1 1.5)"/><path d="M29 5.5a12 12 0 0 0-11.3 16.1L5.3 34a3.2 3.2 0 0 0 0 4.5l1.7 1.7a3.2 3.2 0 0 0 4.5 0l3.2-3.2 3.5 1 1-3.5 3.4-1 1-3.5 2.8-2.8A12 12 0 1 0 29 5.5Z" fill="url(#keyMetal)" stroke="#8c5816" stroke-width="1.6" stroke-linejoin="round"/><path d="M29 10a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Z" fill="#fff0b1" opacity=".95"/><path d="M29 13.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" fill="#172033"/><path d="m8.7 35.1 4.2 4.2M14.2 29.7l4.2 4.2" stroke="#fff0b1" stroke-width="1.6" stroke-linecap="round" opacity=".9"/></svg>';
     qrPanel.append(qrWrap);
+    let qrReady=false;
+    let qrError='';
     if(window.QRCode){
-      new QRCode(qrHost,{text:url,width:224,height:224,colorDark:'#101827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+      try{
+        new QRCode(qrHost,{text:url,width:224,height:224,colorDark:'#101827',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L});
+        qrReady=true;
+      }catch(e){
+        qrError='This link is too large to fit in a QR code. The link was created successfully and can still be copied or shared.';
+        qrHost.textContent=qrError;
+        qrHost.style.cssText='width:224px;height:224px;padding:14px;box-sizing:border-box;color:#8b1e2d;font-size:12px;text-align:center;overflow-wrap:anywhere';
+      }
     }else{
-      qrHost.textContent='QR generation library could not load. Check that /qr.js is available.';
-      qrHost.style.cssText='width:224px;height:224px;color:#101827;font-size:12px;text-align:center;overflow-wrap:anywhere';
+      qrError='QR generation library could not load. Check that /qr.js is available.';
+      qrHost.textContent=qrError;
+      qrHost.style.cssText='width:224px;height:224px;padding:14px;box-sizing:border-box;color:#101827;font-size:12px;text-align:center;overflow-wrap:anywhere';
     }
-    const downloadQR=document.createElement('button');
+    if(qrError){
+      const qrStatus=document.createElement('div');
+      qrStatus.className='small';
+      qrStatus.textContent=qrError;
+      qrPanel.append(qrStatus);
+    }
+        const downloadQR=document.createElement('button');
     downloadQR.type='button';
     downloadQR.className='qr-download';
-    downloadQR.disabled=true;
-    downloadQR.title='Preparing QR image';
+    downloadQR.disabled=!qrReady;
+    downloadQR.title=qrReady?'Preparing QR image':(qrError||'QR unavailable');
     downloadQR.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Download QR image';
     // Draw the key badge into the QR canvas itself so it is part of the image and its download.
     const keySvg=keyBadge.querySelector('svg');
-    if(keySvg){
+    if(qrReady && keySvg){
       keySvg.setAttribute('xmlns','http://www.w3.org/2000/svg');
       const svgText=new XMLSerializer().serializeToString(keySvg);
       const iconImage=new Image();
