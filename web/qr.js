@@ -855,7 +855,7 @@ QRCode.prototype = {
 		// Calculate automatically typeNumber if provided is < 1
 		if (this.typeNumber < 1 ){
 			var typeNumber = 1;
-			for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+			for (typeNumber = 1; typeNumber <= 40; typeNumber++) {
 				var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
 
 				var buffer = new QRBitBuffer();
